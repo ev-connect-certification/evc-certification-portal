@@ -81,9 +81,9 @@ export default function RequestPage() {
                     <Label>Firmware Version</Label>
                     <Input/>
                 </ThreeCol>
-                {isHardware && (
+                <hr className="my-6 border-gray-2"/>
+                {isHardware ? (
                     <>
-                        <hr className="my-6 border-gray-2"/>
                         <Label>Pre-requisites</Label>
                         <Checkbox
                             id="ocpp"
@@ -174,7 +174,39 @@ export default function RequestPage() {
                         <Label className="mt-8 mb-2">How often are firmware updates for this model?</Label>
                         <Input/>
                     </>
+                ) : (
+                    <>
+                        <Label className="mb-2">What has been updated in the firmware?</Label>
+                        <Input/>
+                        <Label className="mb-2 mt-6">When is the next firmware update?</Label>
+                        <Input type="date"/>
+                        <Label className="mb-2 mt-6">Will you be responsible for doing all over-the-air firmware updates?</Label>
+                        <div className="grid grid-cols-2">
+                            <Radio id="ota-res-yes" label="Yes" name="ota-responsibility"/>
+                            <Radio id="ota-res-no" label="No" name="ota-responsibility"/>
+                        </div>
+                    </>
                 )}
+            </DarkSection>
+            <H2>Sales information</H2>
+            <DarkSection>
+                <Label className="mb-2">Is the contract and PO signed?</Label>
+                <div className="grid grid-cols-2">
+                    <Radio id="contract-yes" label="Yes" name="contract"/>
+                    <Radio id="contract-no" label="No" name="contract"/>
+                </div>
+                <ThreeCol className="my-6">
+                    <Label>Business value of selling the unit?</Label>
+                    <Input/>
+                    <Label>What is the amount of business?</Label>
+                    <Input/>
+                    <Label>Urgency level for certification</Label>
+                    <Select>
+                        <option value="test">test</option>
+                    </Select>
+                </ThreeCol>
+                <Label className="mb-2">When are units planned on being shipped?</Label>
+                <Input/>
             </DarkSection>
         </div>
     );
