@@ -1,23 +1,43 @@
-import SEO from "../components/SEO";
-import H1 from "../components/H1";
-import HomeLinkWrapper from "../components/HomeLinkWrapper";
+import SEO from "../../components/SEO";
+import H1 from "../../components/H1";
+import HomeLinkWrapper from "../../components/HomeLinkWrapper";
 import {FiArrowLeft} from "react-icons/fi";
-import H2 from "../components/H2";
-import DarkSection from "../components/DarkSection";
-import Input from "../components/Input";
-import Label from "../components/Label";
-import ThreeCol from "../components/ThreeCol";
-import Select from "../components/Select";
+import H2 from "../../components/H2";
+import DarkSection from "../../components/DarkSection";
+import Input from "../../components/Input";
+import Label from "../../components/Label";
+import ThreeCol from "../../components/ThreeCol";
+import Select from "../../components/Select";
 import {useState} from "react";
-import Checkbox from "../components/Checkbox";
-import {redirect} from "next/dist/next-server/server/api-utils";
-import Radio from "../components/Radio";
+import Checkbox from "../../components/Checkbox";
+import Radio from "../../components/Radio";
+import PrimaryButton from "../../components/PrimaryButton";
+import SecondaryButton from "../../components/SecondaryButton";
+
+interface ConnectorType {
+    type: string,
+    format: string,
+    powerType: "DC" | "AC",
+    maxPower: number,
+    maxVoltage: number,
+    maxCurrent: number,
+};
+
+const initConnector: ConnectorType = {
+    type: "CCS",
+    format: "Cable",
+    powerType: "DC",
+    maxPower: 0,
+    maxVoltage: 0,
+    maxCurrent: 0,
+};
 
 export default function RequestPage() {
     const [isHardware, setIsHardware] = useState<boolean>(false);
     const [isOCPP, setIsOCPP] = useState<boolean>(false);
     const [isWSS, setIsWSS] = useState<boolean>(false);
     const [isCreditCard, setIsCreditCard] = useState<boolean>(false);
+    const [connectors, setConnectors] = useState<ConnectorType[]>([{...initConnector}]);
 
     return (
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -55,6 +75,7 @@ export default function RequestPage() {
                         label="New firmware"
                         name="request_type"
                         checked={!isHardware}
+                        // @ts-ignore
                         onChange={e => setIsHardware(!e.target.checked)}
                     />
                     <Radio
@@ -62,6 +83,7 @@ export default function RequestPage() {
                         label="New hardware"
                         name="request_type"
                         checked={isHardware}
+                        // @ts-ignore
                         onChange={e => setIsHardware(e.target.checked)}
                     />
                 </div>
@@ -90,6 +112,7 @@ export default function RequestPage() {
                             label="Does this model support OCPP 1.6J?"
                             className="my-2"
                             checked={isOCPP}
+                            // @ts-ignore
                             onChange={e => setIsOCPP(e.target.checked)}
                         />
                         <Checkbox
@@ -97,6 +120,7 @@ export default function RequestPage() {
                             label="Does this model support Secure WebSocket (WSS)?"
                             className="my-2"
                             checked={isWSS}
+                            // @ts-ignore
                             onChange={e => setIsWSS(e.target.checked)}
                         />
                         {!(isOCPP && isWSS) && (
@@ -126,14 +150,40 @@ export default function RequestPage() {
                                 <option value="3">Level 3</option>
                             </Select>
                         </ThreeCol>
-                        <ThreeCol className="my-6">
-                            <Label>Max current (A)</Label>
-                            <Input/>
-                            <Label>Max power (W)</Label>
-                            <Input/>
-                            <Label>Max voltage (V)</Label>
-                            <Input/>
-                        </ThreeCol>
+                        <hr className="my-6 border-gray-2"/>
+                        <div className="flex items-center">
+                            <h3 className="font-bold text-base">Connectors ({connectors.length})</h3>
+                            <SecondaryButton onClick={() => {
+                                setConnectors([...connectors, {...initConnector}]);
+                            }} className="ml-auto">Add connector</SecondaryButton>
+                        </div>
+                        {connectors.map((connector, i) => (
+                            <DarkSection key={i} light={true}>
+                                <ThreeCol className="my-6">
+                                    <Label>Max current (A)</Label>
+                                    <Input type="number" value={connector.maxCurrent} onChange={e => {
+                                        let newConnectors = [...connectors];
+                                        const target = e.target as HTMLInputElement;
+                                        newConnectors[i].maxCurrent = +target.value;
+                                        setConnectors(newConnectors);
+                                    }}/>
+                                    <Label>Max power (W)</Label>
+                                    <Input type="number" value={connector.maxPower} onChange={e => {
+                                        let newConnectors = [...connectors];
+                                        const target = e.target as HTMLInputElement;
+                                        newConnectors[i].maxPower = +target.value;
+                                        setConnectors(newConnectors);
+                                    }}/>
+                                    <Label>Max voltage (V)</Label>
+                                    <Input type="number" value={connector.maxVoltage} onChange={e => {
+                                        let newConnectors = [...connectors];
+                                        const target = e.target as HTMLInputElement;
+                                        newConnectors[i].maxVoltage = +target.value;
+                                        setConnectors(newConnectors);
+                                    }}/>
+                                </ThreeCol>
+                            </DarkSection>
+                        ))}
                         <hr className="my-6 border-gray-2"/>
                         <Label className="mb-2">Does this model support credit card payments?</Label>
                         <div className="grid grid-cols-2">
@@ -142,6 +192,7 @@ export default function RequestPage() {
                                 label="Yes"
                                 name="credit-card"
                                 checked={isCreditCard}
+                                // @ts-ignore
                                 onChange={e => setIsCreditCard(e.target.checked)}
                             />
                             <Radio
@@ -149,28 +200,33 @@ export default function RequestPage() {
                                 label="No"
                                 name="credit-card"
                                 checked={!isCreditCard}
+                                // @ts-ignore
                                 onChange={e => setIsCreditCard(!e.target.checked)}
                             />
                         </div>
                         {isCreditCard && (
                             <>
-                                <Label className="mt-8">What payment features does this model support? (check all that apply)</Label>
+                                <Label className="mt-6">What payment features does this model support? (check all that apply)</Label>
                                 <Checkbox id="nfc" label="NFC" className="my-2"/>
                                 <Checkbox id="chip" label="Chip" className="my-2"/>
                                 <Checkbox id="swipe" label="Swipe" className="my-2"/>
+                                <Label className="mt-6 mb-2">What brand of card reader is used? (Nayax, Payter, Magtek, etc.)</Label>
+                                <Input/>
                             </>
                         )}
                         <hr className="my-6 border-gray-2"/>
-                        <Label className="mt-8">CTEP/NTEP certification (check all that apply)</Label>
-                        <Checkbox id="ctep" label="Does this model support CTEP certification?" className="my-2"/>
-                        <Checkbox id="ntep" label="Does this model support NTEP certification?" className="my-2"/>
-                        <Label className="mt-8">Feature support (check all that apply)</Label>
-                        <Checkbox id="rfid" label="Does this model support RFID readers?" className="my-2"/>
-                        <Checkbox id="smart" label="Does this model support smart charging profiles?" className="my-2"/>
-                        <Checkbox id="freevend" label="Does this model support freevend mode?" className="my-2"/>
-                        <Checkbox id="concurrent" label="Does this model support concurrent charging?" className="my-2"/>
-                        <Checkbox id="ota" label="Does this model support over-the-air firmware updates?" className="my-2"/>
-                        <Checkbox id="daisy" label="Is this model daisy-chained?" className="my-2"/>
+                        <Label className="mt-8">Does this model support (check all that apply):</Label>
+                        <Checkbox id="ctep" label="CTEP certification?" className="my-2"/>
+                        <Checkbox id="ntep" label="NTEP certification?" className="my-2"/>
+                        <Label className="mt-8">Does this model support (check all that apply):</Label>
+                        <div className="grid grid-cols-3 gap-y-2 mt-3">
+                            <Checkbox id="rfid" label="RFID readers?" />
+                            <Checkbox id="smart" label="Smart charging profiles?" />
+                            <Checkbox id="freevend" label="Freevend mode?" />
+                            <Checkbox id="concurrent" label="Concurrent charging?" />
+                            <Checkbox id="ota" label="Over-the-air firmware updates?" />
+                            <Checkbox id="daisy" label="Daisy-chaining?" />
+                        </div>
                         <Label className="mt-8 mb-2">How often are firmware updates for this model?</Label>
                         <Input/>
                     </>

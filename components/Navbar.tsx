@@ -10,7 +10,7 @@ export default function Navbar({}: {}) {
             <HomeLinkWrapper>
                 <p className="ml-4 font-bold">EV Connect Certification Portal</p>
             </HomeLinkWrapper>
-            <PrimaryButton className="ml-auto" href="/request">Request certification</PrimaryButton>
+            <PrimaryButton className="ml-auto" href="/request/new">Request certification</PrimaryButton>
         </div>
     );
 }
