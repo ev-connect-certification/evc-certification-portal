@@ -1,6 +1,6 @@
 export interface ModelObj {
     id: number,
-    manufacturer: string,
+    manufacturerId: number,
     name: string,
     connectors: ConnectorType[],
     isCreditCard: boolean,
@@ -12,6 +12,8 @@ export interface ModelObj {
     certificationSupport: certificationSupportOpts[],
     featureSupport: featureSupportOpts[],
     fileKeys: string[],
+    isWifi?: boolean,
+    isSIM?: boolean,
 }
 
 export type certificationSupportOpts = "ctep" | "ntep";
