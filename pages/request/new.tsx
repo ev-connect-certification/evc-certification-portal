@@ -64,13 +64,28 @@ export default function RequestPage() {
     const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
     const [modelConnectivity, setModelConnectivity] = useState<"WiFi" | "SIM" | "Both">("WiFi");
     const [modelName, setModelName] = useState<string>("");
-    const [modelSelection, setModelSelection] = useState<string>("");
-    const [manufacturer, setManufacturer] = useState<string>("");
+    const [modelSelection, setModelSelection] = useState<string>("test");
+    const [manufacturer, setManufacturer] = useState<string>("test");
     const [cardBrand, setCardBrand] = useState<string>("");
+    const [accessCode, setAccessCode] = useState<string>("");
+    const [businessValue, setBusinessValue] = useState<string>("");
+    const [amountBusiness, setAmountBusiness] = useState<string>("");
+    const [urgencyLevel, setUrgencyLevel] = useState<string>("");
 
-    useEffect(() => {
+    function onSubmit() {
 
-    }, []);
+    }
+
+    const canSubmit = (
+        name && email && firmwareVersion && (modelName || modelSelection) && manufacturer && accessCode
+        && (isHardware ? (
+            connectors.length && connectors.every(d => (d.maxPower * d.maxVoltage * d.maxCurrent) > 0)
+            && (!isCreditCard || (cardBrand)) && updateFrequency && nextUpdate && isWSS && isOCPP
+        ) : (
+            firmwareInfo && nextUpdate
+        ))
+        && (!(team === "sales") || (businessValue && amountBusiness && urgencyLevel))
+    );
 
     return (
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -356,13 +371,13 @@ export default function RequestPage() {
                             value={firmwareInfo}
                             onChange={e => setFirmwareInfo((e.target as HTMLInputElement).value)}
                         />
-                        <Label className="mt-6">When is the next firmware update?</Label>
+                        <Label className="mt-6 mb-2">When is the next firmware update?</Label>
                         <Input
                             type="date"
                             value={nextUpdate}
                             onChange={e => setNextUpdate((e.target as HTMLInputElement).value)}
                         />
-                        <Label className="mt-6">Will you be responsible for doing all over-the-air firmware updates?</Label>
+                        <Label className="mt-6 mb-2">Will you be responsible for doing all over-the-air firmware updates?</Label>
                         <div className="grid grid-cols-2">
                             <Radio
                                 id="ota-res-yes"
@@ -412,11 +427,11 @@ export default function RequestPage() {
                         </div>
                         <ThreeCol className="my-6">
                             <Label>Business value of selling the unit?</Label>
-                            <Input/>
+                            <Input {...getInputStateProps(businessValue, setBusinessValue)}/>
                             <Label>What is the amount of business?</Label>
-                            <Input/>
+                            <Input {...getInputStateProps(amountBusiness, setAmountBusiness)}/>
                             <Label>Urgency level for certification</Label>
-                            <Select>
+                            <Select {...getSelectStateProps(urgencyLevel, setUrgencyLevel)}>
                                 <option value="test">test</option>
                             </Select>
                         </ThreeCol>
@@ -425,7 +440,13 @@ export default function RequestPage() {
                     </DarkSection>
                 </>
             )}
-            <PrimaryButton onClick={() => null} disabled={true}>Submit</PrimaryButton>
+            <H2>Access code</H2>
+            <DarkSection>
+                <Label>Access code</Label>
+                <p className="text-gray-1">To request an access code, send an email to <a href="mailto:contact@evconnect.com" className="underline">contact@evconnect.com</a>.</p>
+                <Input className="mt-2" {...getInputStateProps(accessCode, setAccessCode)}/>
+            </DarkSection>
+            <PrimaryButton disabled={!canSubmit} onClick={onSubmit}>Submit</PrimaryButton>
         </div>
     );
 }
