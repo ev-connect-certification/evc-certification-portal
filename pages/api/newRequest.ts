@@ -1,6 +1,6 @@
 import {NextApiHandler} from "next";
 import {supabaseAdmin} from "../../lib/supabaseAdmin";
-import {CertificationRequestObj} from "../../lib/types";
+import {CertificationRequestObj, ModelObj} from "../../lib/types";
 
 const handler: NextApiHandler = async (req, res) => {
     if (req.method !== "POST") return res.status(406).send("Invalid method");
@@ -36,12 +36,51 @@ const handler: NextApiHandler = async (req, res) => {
     try {
         let modelId = req.body.modelId;
 
+        const {name, email, team, firmwareVersion, tier, manufacturerId} = req.body;
+
         // if new hardware, create model and update model ID
         if (req.body.isHardware) {
+            const {
+                modelName,
+                connectors,
+                isCreditCard,
+                cardBrand,
+                paymentFeatures,
+                powerLevel,
+                mountType,
+                isConcurrent,
+                certificationSupport,
+                featureSupport,
+                isWifi,
+                isSIM,
+            } = req.body;
 
+            const newModel = {
+                manufacturerId: manufacturerId,
+                name: modelName,
+                connectors: connectors,
+                isCreditCard: isCreditCard,
+                cardBrand: cardBrand,
+                paymentFeatures: paymentFeatures || [],
+                powerLevel: powerLevel,
+                mountType: mountType,
+                isConcurrent: isConcurrent,
+                certificationSupport: certificationSupport || [],
+                featureSupport: featureSupport || [],
+                fileKeys: [],
+                isWifi: isWifi,
+                isSIM: isSIM,
+            }
+
+            const {data: modelData, error: modelError} = await supabaseAdmin.from<ModelObj>("models")
+                .insert([newModel]);
+
+            if (modelError) throw modelError;
+
+            if (!(modelData && modelData.length)) return res.status(500).send("Failed to create model");
+
+            modelId = modelData[0].id;
         }
-
-        const {name, email, team, firmwareVersion, tier, manufacturerId} = req.body;
 
         let newRequest: Partial<CertificationRequestObj> = {
             isHardware: req.body.isHardware,

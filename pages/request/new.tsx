@@ -1,6 +1,5 @@
 import SEO from "../../components/SEO";
 import H1 from "../../components/H1";
-import HomeLinkWrapper from "../../components/HomeLinkWrapper";
 import {FiArrowLeft} from "react-icons/fi";
 import H2 from "../../components/H2";
 import DarkSection from "../../components/DarkSection";
@@ -8,7 +7,7 @@ import Input from "../../components/Input";
 import Label from "../../components/Label";
 import ThreeCol from "../../components/ThreeCol";
 import Select from "../../components/Select";
-import {Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import Checkbox from "../../components/Checkbox";
 import Radio from "../../components/Radio";
 import PrimaryButton from "../../components/PrimaryButton";
@@ -16,12 +15,17 @@ import SecondaryButton from "../../components/SecondaryButton";
 import {getCheckboxStateProps, getInputStateProps, getSelectStateProps} from "../../lib/statePropUtils";
 import LinkWrapper from "../../components/LinkWrapper";
 import {
-    ConnectorType, connectorTypeFormatOpts,
-    connectorTypeOpts, connectorTypePowerTypeOpts,
-    connectorTypes, ManufacturerObj,
-    modelConnectivityOpts, ModelObj,
+    ConnectorType,
+    connectorTypeFormatOpts,
+    connectorTypeOpts,
+    connectorTypePowerTypeOpts,
+    connectorTypes,
+    ManufacturerObj,
+    modelConnectivityOpts,
+    ModelObj,
     mountTypeOpts,
-    powerLevelOpts, teamOpts
+    powerLevelOpts,
+    teamOpts
 } from "../../lib/types";
 import {supabase} from "../../lib/supabaseClient";
 import axios from "axios";
@@ -59,7 +63,7 @@ export default function RequestPage() {
     const [powerLevel, setPowerLevel] = useState<powerLevelOpts>("Level 2");
     const [mountType, setMountType] = useState<mountTypeOpts>("Pedestal");
     const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
-    const [modelConnectivity, setModelConnectivity] = useState<modelConnectivityOpts>("WiFi");
+    const [modelConnectivity, setModelConnectivity] = useState<modelConnectivityOpts>("wifi");
     const [modelId, setModelId] = useState<number | null>(null);
     const [modelName, setModelName] = useState<string>("test");
     const [manufacturerId, setManufacturerId] = useState<number | null>(null);
@@ -108,7 +112,21 @@ export default function RequestPage() {
         }
 
         if (isHardware) {
-
+            postData = {
+                ...postData,
+                modelName,
+                connectors,
+                isCreditCard,
+                cardBrand,
+                paymentFeatures,
+                powerLevel,
+                mountType,
+                isConcurrent,
+                certificationSupport,
+                featureSupport,
+                isWifi: ["wifi", "both"].includes(modelConnectivity),
+                isSIM: ["sim", "both"].includes(modelConnectivity),
+            }
         } else {
             postData = {
                 ...postData,
