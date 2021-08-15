@@ -356,13 +356,13 @@ export default function RequestPage() {
                             value={firmwareInfo}
                             onChange={e => setFirmwareInfo((e.target as HTMLInputElement).value)}
                         />
-                        <Label className="mb-2 mt-6">When is the next firmware update?</Label>
+                        <Label className="mt-6">When is the next firmware update?</Label>
                         <Input
                             type="date"
                             value={nextUpdate}
                             onChange={e => setNextUpdate((e.target as HTMLInputElement).value)}
                         />
-                        <Label className="mb-2 mt-6">Will you be responsible for doing all over-the-air firmware updates?</Label>
+                        <Label className="mt-6">Will you be responsible for doing all over-the-air firmware updates?</Label>
                         <div className="grid grid-cols-2">
                             <Radio
                                 id="ota-res-yes"
@@ -382,6 +382,25 @@ export default function RequestPage() {
                     </>
                 )}
             </DarkSection>
+            {isHardware && (
+                <>
+                    <H2>Model documents</H2>
+                    <DarkSection>
+                        <Label>Fault codes</Label>
+                        <p className="mb-2 text-gray-1">Fill in <a href="" className="underline">this spreadsheet template</a> as described on the previous page</p>
+                        <Input type="file" accept=".xls,.xlsx"/>
+                        <Label className="mt-6">Manuals</Label>
+                        <p className="mb-2 text-gray-1">Upload any installation or usage manuals related to this model</p>
+                        <Input type="file" multiple/>
+                        <Label className="mt-6">Data/spec sheets</Label>
+                        <p className="mb-2 text-gray-1">Upload any data or spec sheets for this model</p>
+                        <Input type="file"/>
+                        <Label className="mt-6">Certificates</Label>
+                        <p className="mb-2 text-gray-1">Upload any third-party certification certificates for this model</p>
+                        <Input type="file"/>
+                    </DarkSection>
+                </>
+            )}
             {team === "sales" && (
                 <>
                     <H2>Sales information</H2>
