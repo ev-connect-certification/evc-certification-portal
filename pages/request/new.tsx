@@ -15,18 +15,14 @@ import PrimaryButton from "../../components/PrimaryButton";
 import SecondaryButton from "../../components/SecondaryButton";
 import {getCheckboxStateProps, getInputStateProps, getSelectStateProps} from "../../lib/statePropUtils";
 import LinkWrapper from "../../components/LinkWrapper";
-
-type connectorTypeFormatOpts = "cable" | "socket";
-type connectorTypePowerTypeOpts = "DC" | "AC_1_PHASE" | "AC_3_PHASE";
-
-interface ConnectorType {
-    type: string,
-    format: connectorTypeFormatOpts,
-    powerType: connectorTypePowerTypeOpts,
-    maxPower: number,
-    maxVoltage: number,
-    maxCurrent: number,
-};
+import {
+    ConnectorType, connectorTypeFormatOpts,
+    connectorTypeOpts, connectorTypePowerTypeOpts,
+    connectorTypes,
+    modelConnectivityOpts,
+    mountTypeOpts,
+    powerLevelOpts, teamOpts
+} from "../../lib/types";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -37,11 +33,8 @@ const initConnector: ConnectorType = {
     maxCurrent: 0,
 };
 
-const connectorTypes = ["SAE", "SAE_COMBO", "CHADEMO", "CCS", "CCS2", "MENNEKES", "MENNEKES_COMBO", "SCAME_SOCKET", "SCAME_CONNECTOR", "TESLA_R", "TESLA_S"];
-
 export default function RequestPage() {
-    type teamOptions = "manufacturer" | "sales" | "other";
-    const [team, setTeam] = useState<teamOptions>("manufacturer");
+    const [team, setTeam] = useState<teamOpts>("manufacturer");
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [firmwareVersion, setFirmwareVersion] = useState<string>("");
@@ -59,10 +52,10 @@ export default function RequestPage() {
     const [connectors, setConnectors] = useState<ConnectorType[]>([{...initConnector}]);
     const [isWSSSingle, setIsWSSSingle] = useState<boolean>(true);
     const [isConcurrent, setIsConcurrent] = useState<boolean>(false);
-    const [powerLevel, setPowerLevel] = useState<"Level 2" | "Level 3">("Level 2");
-    const [mountType, setMountType] = useState<"Pedestal" | "Wall" | "Pole">("Pedestal");
+    const [powerLevel, setPowerLevel] = useState<powerLevelOpts>("Level 2");
+    const [mountType, setMountType] = useState<mountTypeOpts>("Pedestal");
     const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
-    const [modelConnectivity, setModelConnectivity] = useState<"WiFi" | "SIM" | "Both">("WiFi");
+    const [modelConnectivity, setModelConnectivity] = useState<modelConnectivityOpts>("WiFi");
     const [modelName, setModelName] = useState<string>("");
     const [modelSelection, setModelSelection] = useState<string>("test");
     const [manufacturer, setManufacturer] = useState<string>("test");
@@ -256,7 +249,7 @@ export default function RequestPage() {
                                     <Select value={connector.type} onChange={e => {
                                         let newConnectors = [...connectors];
                                         const target = e.target as HTMLSelectElement;
-                                        newConnectors[i].type = target.value;
+                                        newConnectors[i].type = target.value as connectorTypeOpts;
                                         setConnectors(newConnectors);
                                     }}>
                                         {connectorTypes.map(type => (
@@ -267,7 +260,7 @@ export default function RequestPage() {
                                     <Select value={connector.format} onChange={e => {
                                         let newConnectors = [...connectors];
                                         const target = e.target as HTMLSelectElement;
-                                        newConnectors[i].format = target.value as ("cable" | "socket");
+                                        newConnectors[i].format = target.value as connectorTypeFormatOpts;
                                         setConnectors(newConnectors);
                                     }}>
                                         <option value="cable">Cable</option>
@@ -277,7 +270,7 @@ export default function RequestPage() {
                                     <Select value={connector.powerType} onChange={e => {
                                         let newConnectors = [...connectors];
                                         const target = e.target as HTMLSelectElement;
-                                        newConnectors[i].powerType = target.value as ("DC" | "AC_1_PHASE" | "AC_3_PHASE");
+                                        newConnectors[i].powerType = target.value as connectorTypePowerTypeOpts;
                                         setConnectors(newConnectors);
                                     }}>
                                         <option value="DC">DC</option>
