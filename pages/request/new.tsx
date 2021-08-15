@@ -8,11 +8,12 @@ import Input from "../../components/Input";
 import Label from "../../components/Label";
 import ThreeCol from "../../components/ThreeCol";
 import Select from "../../components/Select";
-import {useState} from "react";
+import {Dispatch, FormEvent, SetStateAction, useState} from "react";
 import Checkbox from "../../components/Checkbox";
 import Radio from "../../components/Radio";
 import PrimaryButton from "../../components/PrimaryButton";
 import SecondaryButton from "../../components/SecondaryButton";
+import {getCheckboxStateProps, getInputStateProps, getSelectStateProps} from "../../lib/statePropUtils";
 
 type connectorTypeFormatOpts = "cable" | "socket";
 type connectorTypePowerTypeOpts = "DC" | "AC_1_PHASE" | "AC_3_PHASE";
@@ -40,12 +41,31 @@ const connectorTypes = ["SAE", "SAE_COMBO", "CHADEMO", "CCS", "CCS2", "MENNEKES"
 export default function RequestPage() {
     type teamOptions = "manufacturer" | "sales" | "other";
     const [team, setTeam] = useState<teamOptions>("manufacturer");
+    const [name, setName] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+    const [firmwareVersion, setFirmwareVersion] = useState<string>("");
     const [isHardware, setIsHardware] = useState<boolean>(false);
     const [isOCPP, setIsOCPP] = useState<boolean>(false);
     const [isWSS, setIsWSS] = useState<boolean>(false);
     const [isCreditCard, setIsCreditCard] = useState<boolean>(false);
+    const [paymentFeatures, setPaymentFeatures] = useState<string[]>([]);
+    const [certificationSupport, setCertificationSupport] = useState<string[]>([]);
+    const [featureSupport, setFeatureSupport] = useState<string[]>([]);
+    const [updateFrequency, setUpdateFrequency] = useState<string>("");
+    const [firmwareInfo, setFirmwareInfo] = useState<string>("");
+    const [nextUpdate, setNextUpdate] = useState<string>("");
+    const [isFirmwareResponsibility, setIsFirmwareResponsibility] = useState<boolean>(false);
     const [connectors, setConnectors] = useState<ConnectorType[]>([{...initConnector}]);
     const [isWSSSingle, setIsWSSSingle] = useState<boolean>(true);
+    const [isConcurrent, setIsConcurrent] = useState<boolean>(false);
+    const [powerLevel, setPowerLevel] = useState<"Level 2" | "Level 3">("Level 2");
+    const [mountType, setMountType] = useState<"Pedestal" | "Wall" | "Pole">("Pedestal");
+    const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
+    const [modelConnectivity, setModelConnectivity] = useState<"WiFi" | "SIM" | "Both">("WiFi");
+    const [modelName, setModelName] = useState<string>("");
+    const [modelSelection, setModelSelection] = useState<string>("");
+    const [manufacturer, setManufacturer] = useState<string>("");
+    const [cardBrand, setCardBrand] = useState<string>("");
 
     return (
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -61,13 +81,15 @@ export default function RequestPage() {
                     <Label>Name</Label>
                     <Input
                         placeholder="Enter your name"
+                        {...getInputStateProps(name, setName)}
                     />
                     <Label>Email</Label>
                     <Input
                         placeholder="Enter your email"
+                        {...getInputStateProps(email, setEmail)}
                     />
                     <Label>Team</Label>
-                    <Select value={team} onChange={e => setTeam((e.target as HTMLSelectElement).value as teamOptions)}>
+                    <Select {...getSelectStateProps(team, setTeam)}>
                         <option value="manufacturer">Hardware Partner</option>
                         <option value="sales">EVC Sales</option>
                         <option value="other">Other</option>
@@ -97,19 +119,19 @@ export default function RequestPage() {
                 </div>
                 <ThreeCol className="my-6">
                     <Label>Manufacturer</Label>
-                    <Select>
+                    <Select {...getSelectStateProps(manufacturer, setManufacturer)}>
                         <option value="test">test</option>
                     </Select>
                     <Label>Model</Label>
                     {isHardware ? (
-                        <Input/>
+                        <Input {...getInputStateProps(modelName, setModelName)}/>
                     ) : (
-                        <Select>
+                        <Select {...getSelectStateProps(modelSelection, setModelSelection)}>
                             <option value="test">test</option>
                         </Select>
                     )}
                     <Label>Firmware Version</Label>
-                    <Input/>
+                    <Input {...getInputStateProps(firmwareVersion, setFirmwareVersion)}/>
                 </ThreeCol>
                 <hr className="my-6 border-gray-2"/>
                 {isHardware ? (
@@ -135,30 +157,71 @@ export default function RequestPage() {
                             <p className="text-red-500">Both OCPP and WSS must be supported for certification to be conducted.</p>
                         )}
                         <hr className="my-6 border-gray-2"/>
-                        <Label className="mb-2">WebSocket Connection Details</Label>
-                        <Select>
-                            <option value="2">Entire charging point has one WebSocket connection</option>
-                            <option value="3">Each connector has individual WebSocket connection</option>
-                        </Select>
                         <ThreeCol className="my-6">
                             <Label>Model Connectivity</Label>
-                            <Select>
+                            <Select {...getSelectStateProps(modelConnectivity, setModelConnectivity)}>
                                 <option value="wifi">WiFi</option>
                                 <option value="sim">SIM</option>
                                 <option value="both">Both</option>
                             </Select>
                             <Label>Does this model need a hub satellite?</Label>
-                            <Select>
-                                <option value="No">No</option>
+                            <Select
+                                value={isHubSatellite ? "Yes" : "No"}
+                                onChange={e => setIsHubSatellite((e.target as HTMLSelectElement).value === "Yes")}
+                            >
                                 <option value="Yes">Yes</option>
+                                <option value="No">No</option>
                             </Select>
                             <Label>Mount type</Label>
-                            <Select>
+                            <Select {...getSelectStateProps(mountType, setMountType)}>
                                 <option value="pedestal">Pedestal</option>
                                 <option value="pole">Pole</option>
                                 <option value="wall">Wall</option>
                             </Select>
                         </ThreeCol>
+                        <ThreeCol className="my-6">
+                            <Label>Power Level</Label>
+                            <Select  {...getSelectStateProps(powerLevel, setPowerLevel)}>
+                                <option value="2">Level 2</option>
+                                <option value="3">Level 3</option>
+                            </Select>
+                            <Label>Concurrent charges supported?</Label>
+                            <Select
+                                value={isConcurrent ? "Yes" : "No"}
+                                onChange={e => setIsConcurrent((e.target as HTMLSelectElement).value === "Yes")}>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </Select>
+                            <Label>One WebSocket connection per</Label>
+                            <Select
+                                value={isWSSSingle ? "station" : "connector"}
+                                onChange={e => setIsWSSSingle((e.target as HTMLInputElement).value === "station")}
+                            >
+                                <option value="station">Station</option>
+                                <option value="connector">Connector</option>
+                            </Select>
+                        </ThreeCol>
+                        <hr className="my-6 border-gray-2"/>
+                        <Label className="mt-8">Feature support (check all that apply):</Label>
+                        <div className="grid grid-cols-3 gap-y-2 mt-3">
+                            <Checkbox
+                                id="rfid"
+                                label="RFID readers"
+                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "rfid")}
+                            />
+                            <Checkbox id="smart" label="Smart charging profiles"
+                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "smart")}
+                            />
+                            <Checkbox id="freevend" label="Freevend mode"
+                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "freevend")}
+                            />
+                            <Checkbox id="throttling" label="Throttling"
+                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "throttling")}/>
+                            <Checkbox id="ota" label="Over-the-air firmware updates"
+                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "ota")}/>
+                            <Checkbox id="daisy" label="Daisy-chaining"
+                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "daisyChaining")}/>
+                        </div>
                         <hr className="my-6 border-gray-2"/>
                         <div className="flex items-center">
                             <h3 className="font-bold text-base">Connectors ({connectors.length})</h3>
@@ -232,42 +295,6 @@ export default function RequestPage() {
                                 }}>Delete</SecondaryButton>
                             </DarkSection>
                         ))}
-                        <ThreeCol className="my-6">
-                            <Label>Power Level</Label>
-                            <Select>
-                                <option value="2">Level 2</option>
-                                <option value="3">Level 3</option>
-                            </Select>
-                            <Label>Throttling supported?</Label>
-                            <Select>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                            </Select>
-                            <Label>Concurrent charges supported?</Label>
-                            <Select>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                            </Select>
-                        </ThreeCol>
-                        <Label>WebSocket configuration</Label>
-                        <div className="grid grid-cols-2 mt-2">
-                            <Radio
-                                id="wss-single"
-                                label="One WSS connection for station"
-                                name="wss-config"
-                                checked={isWSSSingle}
-                                // @ts-ignore
-                                onChange={e => setIsWSSSingle(e.target.checked)}
-                            />
-                            <Radio
-                                id="wss-each"
-                                label="One WSS connection for each connector"
-                                name="wss-config"
-                                checked={!isWSSSingle}
-                                // @ts-ignore
-                                onChange={e => setIsWSSSingle(!e.target.checked)}
-                            />
-                        </div>
                         <hr className="my-6 border-gray-2"/>
                         <Label className="mb-2">Does this model support credit card payments?</Label>
                         <div className="grid grid-cols-2">
@@ -292,42 +319,60 @@ export default function RequestPage() {
                             <>
                                 <Label className="mt-6">What payment features does this model support? (check all that apply)</Label>
                                 <div className="grid grid-cols-3 mt-2">
-                                    <Checkbox id="nfc" label="NFC" />
-                                    <Checkbox id="chip" label="Chip" />
-                                    <Checkbox id="swipe" label="Swipe" />
+                                    <Checkbox id="nfc" label="NFC"
+                                        {...getCheckboxStateProps(paymentFeatures, setPaymentFeatures, "nfc")}/>
+                                    <Checkbox id="chip" label="Chip"
+                                        {...getCheckboxStateProps(paymentFeatures, setPaymentFeatures, "chip")}/>
+                                    <Checkbox id="swipe" label="Swipe"
+                                        {...getCheckboxStateProps(paymentFeatures, setPaymentFeatures, "swipe")}/>
                                 </div>
                                 <Label className="mt-6 mb-2">What brand of card reader is used? (Nayax, Payter, Magtek, etc.)</Label>
-                                <Input/>
+                                <Input {...getInputStateProps(cardBrand, setCardBrand)}/>
                             </>
                         )}
                         <hr className="my-6 border-gray-2"/>
                         <Label className="mt-8">Certification support (check all that apply):</Label>
-                        <Checkbox id="ctep" label="CTEP certification support" className="my-2"/>
-                        <Checkbox id="ntep" label="NTEP certification support" className="my-2"/>
-                        <hr className="my-6 border-gray-2"/>
-                        <Label className="mt-8">Feature support (check all that apply):</Label>
-                        <div className="grid grid-cols-3 gap-y-2 mt-3">
-                            <Checkbox id="rfid" label="RFID readers" />
-                            <Checkbox id="smart" label="Smart charging profiles" />
-                            <Checkbox id="freevend" label="Freevend mode" />
-                            <Checkbox id="concurrent" label="Concurrent charging" />
-                            <Checkbox id="ota" label="Over-the-air firmware updates" />
-                            <Checkbox id="daisy" label="Daisy-chaining" />
-                        </div>
+                        <Checkbox id="ctep" label="CTEP certification support" className="my-2"
+                            {...getCheckboxStateProps(certificationSupport, setCertificationSupport, "ctep")}
+                        />
+                        <Checkbox id="ntep" label="NTEP certification support" className="my-2"
+                            {...getCheckboxStateProps(certificationSupport, setCertificationSupport, "ntep")}/>
                         <hr className="my-6 border-gray-2"/>
                         <Label className="mt-8 mb-2">How often are firmware updates for this model?</Label>
-                        <Input/>
+                        <Input
+                            value={updateFrequency}
+                            onChange={e => setUpdateFrequency((e.target as HTMLInputElement).value)}
+                        />
                     </>
                 ) : (
                     <>
                         <Label className="mb-2">What has been updated in the firmware?</Label>
-                        <Input/>
+                        <Input
+                            value={firmwareInfo}
+                            onChange={e => setFirmwareInfo((e.target as HTMLInputElement).value)}
+                        />
                         <Label className="mb-2 mt-6">When is the next firmware update?</Label>
-                        <Input type="date"/>
+                        <Input
+                            type="date"
+                            value={nextUpdate}
+                            onChange={e => setNextUpdate((e.target as HTMLInputElement).value)}
+                        />
                         <Label className="mb-2 mt-6">Will you be responsible for doing all over-the-air firmware updates?</Label>
                         <div className="grid grid-cols-2">
-                            <Radio id="ota-res-yes" label="Yes" name="ota-responsibility"/>
-                            <Radio id="ota-res-no" label="No" name="ota-responsibility"/>
+                            <Radio
+                                id="ota-res-yes"
+                                label="Yes"
+                                name="ota-responsibility"
+                                checked={isFirmwareResponsibility}
+                                onChange={e => setIsFirmwareResponsibility((e.target as HTMLInputElement).checked)}
+                            />
+                            <Radio
+                                id="ota-res-no"
+                                label="No"
+                                name="ota-responsibility"
+                                checked={!isFirmwareResponsibility}
+                                onChange={e => setIsFirmwareResponsibility(!(e.target as HTMLInputElement).checked)}
+                            />
                         </div>
                     </>
                 )}
