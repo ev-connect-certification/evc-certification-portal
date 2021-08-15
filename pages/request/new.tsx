@@ -8,12 +8,13 @@ import Input from "../../components/Input";
 import Label from "../../components/Label";
 import ThreeCol from "../../components/ThreeCol";
 import Select from "../../components/Select";
-import {Dispatch, FormEvent, SetStateAction, useState} from "react";
+import {Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react";
 import Checkbox from "../../components/Checkbox";
 import Radio from "../../components/Radio";
 import PrimaryButton from "../../components/PrimaryButton";
 import SecondaryButton from "../../components/SecondaryButton";
 import {getCheckboxStateProps, getInputStateProps, getSelectStateProps} from "../../lib/statePropUtils";
+import LinkWrapper from "../../components/LinkWrapper";
 
 type connectorTypeFormatOpts = "cable" | "socket";
 type connectorTypePowerTypeOpts = "DC" | "AC_1_PHASE" | "AC_3_PHASE";
@@ -67,13 +68,17 @@ export default function RequestPage() {
     const [manufacturer, setManufacturer] = useState<string>("");
     const [cardBrand, setCardBrand] = useState<string>("");
 
+    useEffect(() => {
+
+    }, []);
+
     return (
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
             <SEO/>
-            <HomeLinkWrapper className="flex items-center font-bold text-gray-1 mb-4">
+            <LinkWrapper className="flex items-center font-bold text-gray-1 mb-4" href="/request/info">
                 <FiArrowLeft/>
                 <div className="ml-2"><span>Back</span></div>
-            </HomeLinkWrapper>
+            </LinkWrapper>
             <H1 className="mb-4">Request new certification</H1>
             <H2>Requester information</H2>
             <DarkSection>
