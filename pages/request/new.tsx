@@ -24,6 +24,7 @@ import {
     powerLevelOpts, teamOpts
 } from "../../lib/types";
 import {supabase} from "../../lib/supabaseClient";
+import axios from "axios";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -68,6 +69,7 @@ export default function RequestPage() {
     const [amountBusiness, setAmountBusiness] = useState<string>("");
     const [urgencyLevel, setUrgencyLevel] = useState<string>("");
     const [tier, setTier] = useState<number>(1);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         (async () => {
@@ -92,7 +94,35 @@ export default function RequestPage() {
     }, []);
 
     function onSubmit() {
+        setIsLoading(true);
 
+        let postData: any = {
+            accessCode: accessCode,
+            name: name,
+            email: email,
+            team: team,
+            firmwareVersion: firmwareVersion,
+            manufacturerId: manufacturerId,
+            tier: tier,
+            isHardware: isHardware,
+        }
+
+        if (isHardware) {
+
+        } else {
+            postData = {
+                ...postData,
+                modelId: modelId,
+                firmwareInfo: firmwareInfo,
+                nextUpdate: nextUpdate,
+                isFirmwareResponsibility: isFirmwareResponsibility,
+            }
+        }
+
+        axios.post("/api/newRequest", postData)
+            .then(res => alert(res))
+            .catch(e => alert(e))
+            .finally(() => setIsLoading(false));
     }
 
     const canSubmit = (

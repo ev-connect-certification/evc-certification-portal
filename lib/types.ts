@@ -39,6 +39,7 @@ export interface ConnectorType {
 
 export interface CertificationRequestObj {
     id: number,
+    isHardware: boolean,
     requesterName: string,
     requesterEmail: string,
     requesterTeam: teamOpts,
@@ -47,6 +48,9 @@ export interface CertificationRequestObj {
     firmwareVersion: string,
     tier: number, // 1-5
     requestDate: string, // date
+    firmwareInfo?: string,
+    nextUpdate?: string, // date
+    isFirmwareResponsibility?: boolean,
     // wip
 }
 
