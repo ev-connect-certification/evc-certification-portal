@@ -18,11 +18,12 @@ import LinkWrapper from "../../components/LinkWrapper";
 import {
     ConnectorType, connectorTypeFormatOpts,
     connectorTypeOpts, connectorTypePowerTypeOpts,
-    connectorTypes,
-    modelConnectivityOpts,
+    connectorTypes, ManufacturerObj,
+    modelConnectivityOpts, ModelObj,
     mountTypeOpts,
     powerLevelOpts, teamOpts
 } from "../../lib/types";
+import {supabase} from "../../lib/supabaseClient";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -34,6 +35,8 @@ const initConnector: ConnectorType = {
 };
 
 export default function RequestPage() {
+    const [manufacturers, setManufacturers] = useState<ManufacturerObj[]>([]);
+    const [models, setModels] = useState<ModelObj[]>([]);
     const [team, setTeam] = useState<teamOpts>("manufacturer");
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -56,9 +59,9 @@ export default function RequestPage() {
     const [mountType, setMountType] = useState<mountTypeOpts>("Pedestal");
     const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
     const [modelConnectivity, setModelConnectivity] = useState<modelConnectivityOpts>("WiFi");
-    const [modelName, setModelName] = useState<string>("");
-    const [modelSelection, setModelSelection] = useState<string>("test");
-    const [manufacturer, setManufacturer] = useState<string>("test");
+    const [modelId, setModelId] = useState<number | null>(null);
+    const [modelName, setModelName] = useState<string>("test");
+    const [manufacturerId, setManufacturerId] = useState<number | null>(null);
     const [cardBrand, setCardBrand] = useState<string>("");
     const [accessCode, setAccessCode] = useState<string>("");
     const [businessValue, setBusinessValue] = useState<string>("");
@@ -66,12 +69,34 @@ export default function RequestPage() {
     const [urgencyLevel, setUrgencyLevel] = useState<string>("");
     const [tier, setTier] = useState<number>(1);
 
+    useEffect(() => {
+        (async () => {
+            const {data: ManufacturerData, error: ManufacturerError} = await supabase
+                .from<ManufacturerObj>("manufacturers")
+                .select("*");
+
+            if (ManufacturerData && ManufacturerData.length) setManufacturers(ManufacturerData);
+
+            setManufacturerId(ManufacturerData[0].id);
+
+            const {data: ModelData, error: ModelError} = await supabase
+                .from<ModelObj>("models")
+                .select("*");
+
+            if (ModelData && ModelData.length) setModels(ModelData);
+
+            const firstManufacturerModel = ModelData.find(d => d.manufacturerId === ManufacturerData[0].id);
+
+            setModelId(firstManufacturerModel ? firstManufacturerModel.id : null);
+        })();
+    }, []);
+
     function onSubmit() {
 
     }
 
     const canSubmit = (
-        name && email && firmwareVersion && (modelName || modelSelection) && manufacturer && accessCode && tier
+        name && email && firmwareVersion && (modelId || modelName) && manufacturerId && accessCode && tier
         && (isHardware ? (
             connectors.length && connectors.every(d => (d.maxPower * d.maxVoltage * d.maxCurrent) > 0)
             && (!isCreditCard || (cardBrand)) && updateFrequency && nextUpdate && isWSS && isOCPP
@@ -133,15 +158,19 @@ export default function RequestPage() {
                 </div>
                 <ThreeCol className="my-6">
                     <Label>Manufacturer</Label>
-                    <Select {...getSelectStateProps(manufacturer, setManufacturer)}>
-                        <option value="test">test</option>
+                    <Select {...getSelectStateProps(manufacturerId ? manufacturerId.toString() : "", d => setManufacturerId(+d))}>
+                        {manufacturers.map(d => (
+                            <option value={d.id} key={`manufacturer-option-${d.id}`}>{d.name}</option>
+                        ))}
                     </Select>
                     <Label>Model</Label>
                     {isHardware ? (
                         <Input {...getInputStateProps(modelName, setModelName)}/>
                     ) : (
-                        <Select {...getSelectStateProps(modelSelection, setModelSelection)}>
-                            <option value="test">test</option>
+                        <Select {...getSelectStateProps(modelId ? modelId.toString() : "", d => setModelId(+d))}>
+                            {models.filter(d => d.manufacturerId === manufacturerId).map(d => (
+                                <option value={d.id} key={`model-option-${d.id}`}>{d.name}</option>
+                            ))}
                         </Select>
                     )}
                     <Label>Firmware Version</Label>
