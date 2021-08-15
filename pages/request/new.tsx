@@ -425,7 +425,7 @@ export default function RequestPage() {
                     </DarkSection>
                 </>
             )}
-            <PrimaryButton onClick={() => null} disabled={true}>Next</PrimaryButton>
+            <PrimaryButton onClick={() => null} disabled={true}>Submit</PrimaryButton>
         </div>
     );
 }
