@@ -43,6 +43,7 @@ export interface CertificationRequestObj {
     manufacturerId: number,
     modelId: number,
     firmwareVersion: string,
+    tier: number, // 1-5
     requestDate: string, // date
     // wip
 }

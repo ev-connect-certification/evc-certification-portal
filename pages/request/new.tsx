@@ -64,13 +64,14 @@ export default function RequestPage() {
     const [businessValue, setBusinessValue] = useState<string>("");
     const [amountBusiness, setAmountBusiness] = useState<string>("");
     const [urgencyLevel, setUrgencyLevel] = useState<string>("");
+    const [tier, setTier] = useState<number>(1);
 
     function onSubmit() {
 
     }
 
     const canSubmit = (
-        name && email && firmwareVersion && (modelName || modelSelection) && manufacturer && accessCode
+        name && email && firmwareVersion && (modelName || modelSelection) && manufacturer && accessCode && tier
         && (isHardware ? (
             connectors.length && connectors.every(d => (d.maxPower * d.maxVoltage * d.maxCurrent) > 0)
             && (!isCreditCard || (cardBrand)) && updateFrequency && nextUpdate && isWSS && isOCPP
@@ -146,6 +147,14 @@ export default function RequestPage() {
                     <Label>Firmware Version</Label>
                     <Input {...getInputStateProps(firmwareVersion, setFirmwareVersion)}/>
                 </ThreeCol>
+                <Label className="mb-2">Certification tier</Label>
+                <Select {...getSelectStateProps(tier.toString(), d => setTier(+d))}>
+                    <option value="1">Tier 1: Basic OCPP support</option>
+                    <option value="2">Tier 2: previous tiers, and RFID support</option>
+                    <option value="3">Tier 3: previous tiers, and Smart charging, freevend, credit card, hub satellite support</option>
+                    <option value="4">Tier 4: previous tiers, and ISO 15118 support</option>
+                    <option value="5">Tier 5: previous tiers, and Vehicle to Grid (V2G) support</option>
+                </Select>
                 <hr className="my-6 border-gray-2"/>
                 {isHardware ? (
                     <>
