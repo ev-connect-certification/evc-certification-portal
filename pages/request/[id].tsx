@@ -9,10 +9,14 @@ import H2 from "../../components/H2";
 import ThreeCol from "../../components/ThreeCol";
 import Label from "../../components/Label";
 import {getTeam, getTier} from "../../lib/labels";
-import React from "react";
+import React, {useState} from "react";
 import DarkSection from "../../components/DarkSection";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import {Auth} from "@supabase/ui";
+import {format} from "date-fns";
+import PrimaryButton from "../../components/PrimaryButton";
+import Modal from "../../components/Modal";
+import SecondaryButton from "../../components/SecondaryButton";
 
 const ThreeColText = ({text, className}: {text: { [key: string]: string }, className?: string}) => {
     return (
@@ -46,6 +50,7 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
     } = requestObj.models;
 
     const {user} = Auth.useUser();
+    const [approveOpen, setApproveOpen] = useState<boolean>(false);
 
     return (
         <div className="max-w-5xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -74,6 +79,33 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
                 </div>
                 <div className="w-full">
                     <H2 id="timeline">Timeline and results</H2>
+                    <div className="flex items-center h-12">
+                        <div className="w-32"><Label>Type</Label></div>
+                        <div className="w-32"><Label>Date</Label></div>
+                        <div className="w-32"><Label>Tester</Label></div>
+                        <div className="w-32"><Label>Status</Label></div>
+                    </div>
+                    <hr className="text-gray-1"/>
+                    <div className="flex items-center h-12">
+                        <div className="w-32"><span>Initial request</span></div>
+                        <div className="w-32 text-gray-1"><span>{format(new Date(requestObj.requestDate), "MMMM d, yyyy")}</span></div>
+                        <div className="w-32 text-gray-1"><span>-</span></div>
+                        <div className="w-48 text-gray-1 flex items-center">
+                            <div className="w-2 h-2 rounded-full bg-yellow-300 mr-3"/>
+                            <span>Awaiting approval</span>
+                        </div>
+                        {user && (
+                            <PrimaryButton className="ml-auto" onClick={() => setApproveOpen(true)}>Approve for scheduling</PrimaryButton>
+                        )}
+                    </div>
+                    <Modal isOpen={approveOpen} setIsOpen={setApproveOpen}>
+                        <H2 className="mb-4">Approve request for scheduling</H2>
+                        <p className="text-sm my-4 text-gray-1">If you approve this request, an email will be sent to the requester allowing them to schedule a time for certification testing.</p>
+                        <div className="flex items-center">
+                            <PrimaryButton onClick={() => null}>Approve</PrimaryButton>
+                            <SecondaryButton onClick={() => setApproveOpen(false)} className="ml-2">Cancel</SecondaryButton>
+                        </div>
+                    </Modal>
                     <hr className="my-12 text-gray-1"/>
                     <H2 id="requesterInfo">Requester information</H2>
                     <ThreeColText text={{
@@ -188,8 +220,6 @@ export const getServerSideProps: GetServerSideProps = async ({params}) => {
         .from<CertificationRequestObj>("requests")
         .select("*, models (*), manufacturers (*)")
         .eq("id", +id);
-
-    console.log(data, error);
 
     if (error) return {notFound: true};
 

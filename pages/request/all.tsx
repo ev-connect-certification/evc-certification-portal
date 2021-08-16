@@ -8,6 +8,7 @@ import {useEffect, useState} from "react";
 import {CertificationRequestObj} from "../../lib/types";
 import LinkWrapper from "../../components/LinkWrapper";
 import {format} from "date-fns";
+import Label from "../../components/Label";
 
 export default function RequestInfo({}: {}) {
     const [requests, setRequests] = useState<(CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}})[] | null>(null);
@@ -33,12 +34,12 @@ export default function RequestInfo({}: {}) {
             {requests ? !!requests.length ? (
                 <>
                     <div className="h-12 flex items-center">
-                        <div className="w-32 text-gray-1"><span>Manufacturer</span></div>
-                        <div className="w-64 text-gray-1"><span>Model</span></div>
-                        <div className="w-32 text-gray-1"><span>Firmware version</span></div>
-                        <div className="w-32 text-gray-1"><span>Request date</span></div>
-                        <div className="w-32 text-gray-1"><span>Tier</span></div>
-                        <div className="w-32 text-gray-1"><span>Status</span></div>
+                        <div className="w-32"><Label>Manufacturer</Label></div>
+                        <div className="w-64"><Label>Model</Label></div>
+                        <div className="w-32"><Label>Firmware version</Label></div>
+                        <div className="w-32"><Label>Request date</Label></div>
+                        <div className="w-32"><Label>Tier</Label></div>
+                        <div className="w-32"><Label>Status</Label></div>
                     </div>
                     <hr className="text-gray-1"/>
                     {requests.map(request => (
@@ -50,7 +51,7 @@ export default function RequestInfo({}: {}) {
                             <div className="flex-shrink-0 w-32 text-gray-1"><span>Tier {request.tier}</span></div>
                             <div className="flex-grow-1 flex items-center">
                                 <div className="rounded-full bg-yellow-300 w-2 h-2 mr-3"/>
-                                <div><span>Pending approval</span></div>
+                                <div><span>Awaiting approval</span></div>
                             </div>
                         </LinkWrapper>
                     ))}
