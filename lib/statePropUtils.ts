@@ -22,3 +22,8 @@ export const getInputStateProps = (state: string, setState: Dispatch<SetStateAct
     value: state,
     onChange: (e: FormEvent<HTMLInputElement>) => setState((e.target as HTMLInputElement).value),
 });
+
+export const getTextAreaStateProps = (state: string, setState: Dispatch<SetStateAction<string>>) => ({
+    value: state,
+    onChange: (e: FormEvent<HTMLTextAreaElement>) => setState((e.target as HTMLTextAreaElement).value),
+});

@@ -17,21 +17,31 @@ import DarkSection from "../../../components/DarkSection";
 import {Auth} from "@supabase/ui";
 import ThreeCol from "../../../components/ThreeCol";
 import Input from "../../../components/Input";
-import {getInputStateProps} from "../../../lib/statePropUtils";
+import {getInputStateProps, getSelectStateProps, getTextAreaStateProps} from "../../../lib/statePropUtils";
 import Label from "../../../components/Label";
 import {useToasts} from "react-toast-notifications";
 import axios from "axios";
+import Select from "../../../components/Select";
+import TextArea from "../../../components/TextArea";
+import {supabase} from "../../../lib/supabaseClient";
 
 export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}} & {tests: TestObj[]}, testObj: TestObj}) {
     const {user} = Auth.useUser();
     const {addToast} = useToasts();
     const [testObj, setTestObj] = useState<TestObj>(props.testObj);
+
+    // scheduling states
     const [scheduleOpen, setScheduleOpen] = useState<boolean>(false);
     const [chargePointId, setChargePointId] = useState<string>("");
     const [rfidIds, setRfidIds] = useState<string>("");
     const [scheduleTime, setScheduleTime] = useState<string>("");
     const [accessCode, setAccessCode] = useState<string>("");
     const [scheduleLoading, setScheduleLoading] = useState<boolean>(false);
+
+    // test results
+    const [resultsOpen, setResultsOpen] = useState<boolean>(false);
+    const [results, setResults] = useState<{test: string, notes: string, pass: boolean, tier: number}[]>([]);
+    const [resultsLoading, setResultsLoading] = useState<boolean>(false);
 
     const requestObj = props.requestObj;
 
@@ -54,6 +64,32 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
         });
     }
 
+    async function onSubmitResults() {
+        setResultsLoading(true);
+
+        const {data, error} = await supabase.from<TestObj>("tests")
+            .update({
+                results: results,
+                status: testsPassed ? "pass" : "fail",
+            })
+            .eq("id", testObj.id);
+
+        setResultsLoading(false);
+
+        if (error) addToast(error.message, {appearance: "error", autoDismiss: true});
+
+        if (!(data && data.length)) addToast("Failed to update test", {appearance: "error", autoDismiss: true});
+
+        setTestObj(data[0]);
+
+        setResultsOpen(false);
+
+        addToast("Submitted test results", {appearance: "success", autoDismiss: true});
+    }
+
+    const canSubmitTest = !!results.length && results.every(d => d.test);
+    const testsPassed = results.every(d => d.pass);
+
     const thisIndex = requestObj.tests
         .sort((a, b) => +new Date(b.approveDate) - +new Date(a.approveDate))
         .findIndex(d => d.id === testObj.id);
@@ -71,9 +107,20 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
             {testObj.status === "approved" && (
                 <DarkSection>
                     <p className="text-sm text-gray-1">
-                        This test has been approved and is ready to be scheduled. {user && <span>Share this link and the access code <code className="bg-gray-1 p-1 rounded text-white">${testObj.accessCode}</code> with others to allow them to schedule the test.</span>}
+                        This test has been approved and is ready to be scheduled. {user && <span>Share this link and the access code <code className="bg-gray-1 p-1 rounded text-white">{testObj.accessCode}</code> with others to allow them to schedule the test.</span>}
                     </p>
                     <PrimaryButton containerClassName="mt-4" onClick={() => setScheduleOpen(true)}>Schedule</PrimaryButton>
+                </DarkSection>
+            )}
+            {testObj.status === "scheduled" && (
+                <DarkSection>
+                    <p className="text-sm text-gray-1">
+                        This certification is scheduled to be conducted on {format(new Date(testObj.testDate), "MMMM d, yyyy 'at' h:mm a")}.
+                        Use this link to {user ? "submit" : "see"} test results once tests are completed.
+                    </p>
+                    {user && (
+                        <PrimaryButton containerClassName="mt-4" onClick={() => setResultsOpen(true)}>Submit results</PrimaryButton>
+                    )}
                 </DarkSection>
             )}
             <H2>Test information</H2>
@@ -121,7 +168,97 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                 "RFID IDs": testObj.rfidIds || "-",
             }} className="my-6"/>
             <hr className="my-12 text-gray-1"/>
-            <H2>Results</H2>
+            <H2 className="mb-4">Results</H2>
+            {testObj.results ? (
+                <>
+                    <div className="flex items-center h-12">
+                        <div className="w-64"><Label>Test</Label></div>
+                        <div className="w-32"><Label>Tier</Label></div>
+                        <div className="w-32"><Label>Result</Label></div>
+                        <div className="w-32"><Label>Notes</Label></div>
+                    </div>
+                    <hr className="text-gray-1"/>
+                    {testObj.results.map(result => (
+                        <div className="flex items-center h-12">
+                            <div className="w-64 flex-shrink-0"><span>{result.test}</span></div>
+                            <div className="w-32 text-gray-1 flex-shrink-0"><span>Tier {result.tier}</span></div>
+                            <div className="w-32 flex-shrink-0">
+                                <TestStatus status={result.pass ? "pass" : "fail"}/>
+                            </div>
+                            <div className="flex-grow-1">
+                                <p className="text-gray-1">{result.notes}</p>
+                            </div>
+                        </div>
+                    ))}
+                </>
+            ) : user ? (
+                <>
+                    <PrimaryButton onClick={() => setResultsOpen(true)}>Submit results</PrimaryButton>
+                </>
+            ) : (
+                <p className="text-gray-1">An EV Connect team member will upload results here once tests are conducted.</p>
+            )}
+            <Modal isOpen={resultsOpen} setIsOpen={setResultsOpen} wide={true}>
+                <div className="mb-6 flex items-center">
+                    <H2>Submit test results ({results.length})</H2>
+                    <PrimaryButton containerClassName="ml-auto" onClick={() => {
+                        setResults([...results, {test: "", notes: "", pass: true, tier: 1}]);
+                    }}>Add test</PrimaryButton>
+                </div>
+                <div style={{maxHeight: "calc(100vh - 200px)"}} className="overflow-y-auto">
+                    {!results.length && (
+                        <p className="text-gray-1">Press "Add test" above to add test results.</p>
+                    )}
+                    {results.map((result, i) => (
+                        <DarkSection
+                            key={`result-${i}`}
+                            className={(i === 0 ? "mt-0" : "") + " " + (i === results.length - 1 ? "mb-0" : "")}
+                        >
+                            <ThreeColText text={{
+                                Name: <Input {...getInputStateProps(result.test, (d: string) => {
+                                    let newResults = [...results];
+                                    newResults[i].test = d;
+                                    setResults(newResults);
+                                })}/>,
+                                Result: <Select {...getSelectStateProps(result.pass ? "Pass" : "Fail", (d: string) => {
+                                    let newResults = [...results];
+                                    newResults[i].pass = d === "Pass";
+                                    setResults(newResults);
+                                })}>
+                                    <option value="Pass">Pass</option>
+                                    <option value="Fail">Fail</option>
+                                </Select>,
+                                Tier: <Select {...getSelectStateProps(result.tier.toString(), (d: string) => {
+                                    let newResults = [...results];
+                                    newResults[i].tier = +d;
+                                    setResults(newResults);
+                                })}>
+                                    <option value="1">Tier 1</option>
+                                    <option value="2">Tier 2</option>
+                                    <option value="3">Tier 3</option>
+                                    <option value="4">Tier 4</option>
+                                    <option value="5">Tier 5</option>
+                                </Select>,
+                            }} className="mb-6"/>
+                            <Label className="mb-2">Notes</Label>
+                            <TextArea {...getTextAreaStateProps(result.notes, (d: string) => {
+                                let newResults = [...results];
+                                newResults[i].notes = d;
+                                setResults(newResults);
+                            })}/>
+                            <SecondaryButton onClick={() => {
+                                let newResults = [...results];
+                                newResults.splice(i, 1);
+                                setResults(newResults);
+                            }} containerClassName="mt-4">Delete test</SecondaryButton>
+                        </DarkSection>
+                    ))}
+                </div>
+                <div className="flex items-center mt-6">
+                    <PrimaryButton onClick={onSubmitResults} isLoading={resultsLoading} disabled={!canSubmitTest}>Submit</PrimaryButton>
+                    <SecondaryButton onClick={() => setResultsOpen(false)} containerClassName="ml-2">Cancel</SecondaryButton>
+                </div>
+            </Modal>
         </div>
     );
 }

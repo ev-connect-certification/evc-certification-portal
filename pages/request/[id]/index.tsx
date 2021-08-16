@@ -93,7 +93,7 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
             )}
             <H1 className="mb-4">Request: {requestObj.manufacturers.name} {requestObj.models.name} @ {requestObj.firmwareVersion}</H1>
             <DarkSection>
-                <p className="text-gray-1">
+                <p className="text-gray-1 text-sm">
                     {user
                         ? "Share the link of this page with anyone who needs to see the status of this request."
                         : "Keep track of the link of this page. It's how you'll be able see the status of your request. If you are the requester, you will also be emailed if there are any updates."

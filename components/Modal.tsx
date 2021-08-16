@@ -7,7 +7,7 @@ export default function Modal({isOpen, setIsOpen, children, wide}: {
     children: ReactNode,
     wide?: boolean,
 }) {
-    const modalClasses = "top-24 left-1/2 fixed bg-white p-4 rounded-md shadow mx-4";
+    const modalClasses = "top-8 left-1/2 fixed bg-white p-4 rounded-md shadow mx-4";
 
     return (
         <ReactModal
