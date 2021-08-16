@@ -1,5 +1,6 @@
 import {teamOpts, testStatusOpts} from "./types";
 import React from "react";
+import {format} from "date-fns";
 
 export const getTeam = (key: teamOpts) => ({
     other: "Other",
@@ -15,17 +16,17 @@ export const getTier = (key: number) => ({
     5: "Tier 5: previous tiers, and Vehicle to Grid (V2G) support",
 }[key]);
 
-export const TestStatus = ({status}: {status: testStatusOpts}) => (
+export const TestStatus = ({status, testDate}: {status: testStatusOpts, testDate?: string,}) => (
     <div className="flex items-center">
         <div className={`w-2 h-2 rounded-full ${{
-            approved: "border-2 border-yellow-300",
-            scheduled: "bg-yellow-300",
+            approved: "bg-yellow-300",
+            scheduled: "border-2 border-green-500",
             pass: "bg-green-500",
             fail: "bg-red-500",
         }[status]} mr-3`}/>
         <span>{{
             approved: "Awaiting scheduling",
-            scheduled: "Scheduled",
+            scheduled: `Scheduled${testDate ? ` for ${format(new Date(testDate), "MMMM d, yyyy 'at' h:mm a")}` : ""}`,
             pass: "Pass",
             fail: "Fail",
         }[status]}</span>

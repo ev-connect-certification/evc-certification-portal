@@ -9,6 +9,7 @@ import {CertificationRequestObj, TestObj} from "../../lib/types";
 import LinkWrapper from "../../components/LinkWrapper";
 import {format} from "date-fns";
 import Label from "../../components/Label";
+import {TestStatus} from "../../lib/labels";
 
 export default function RequestInfo({}: {}) {
     const [requests, setRequests] = useState<(CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}} & {tests: TestObj[]})[] | null>(null);
@@ -53,9 +54,18 @@ export default function RequestInfo({}: {}) {
                                 <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.isHardware ? "Yes" : "No"}</span></div>
                                 <div className="flex-shrink-0 w-32 text-gray-1"><span>{format(new Date(request.requestDate), "MMMM d, yyyy")}</span></div>
                                 <div className="flex-shrink-0 w-32 text-gray-1"><span>Tier {request.tier}</span></div>
-                                <div className="flex-grow-1 flex items-center">
-                                    <div className={`rounded-full ${request.tests.length ? "bg-yellow-300" : "border-2 border-yellow-300"} w-2 h-2 mr-3`}/>
-                                    <div><span>Awaiting {request.tests.length ? "scheduling" : "approval"}</span></div>
+                                <div className="flex-grow-1">
+                                    {request.tests.length ? (
+                                        <TestStatus
+                                            status={request.tests.sort((a, b) => +new Date(b.approveDate) - +new Date(a.approveDate))[0].status}
+                                            testDate={request.tests.sort((a, b) => +new Date(b.approveDate) - +new Date(a.approveDate))[0].testDate}
+                                        />
+                                    ) : (
+                                        <div className="flex items-center">
+                                            <div className={`rounded-full border-2 border-yellow-300 w-2 h-2 mr-3`}/>
+                                            <div><span>Awaiting approval</span></div>
+                                        </div>
+                                    )}
                                 </div>
                             </LinkWrapper>
                         ))

@@ -2,13 +2,14 @@ import {NextApiHandler} from "next";
 import {supabaseAdmin} from "../../lib/supabaseAdmin";
 import {CertificationRequestObj, ModelObj} from "../../lib/types";
 import generator from "generate-password";
+import {res200, res400, res403, res405, res500} from "../../lib/apiResponses";
 
 const handler: NextApiHandler = async (req, res) => {
-    if (req.method !== "POST") return res.status(406).send("Invalid method");
+    if (req.method !== "POST") return res405(res);
 
-    if (!(req.body.accessCode && req.body.accessCode === process.env.REQUEST_ACCESS_CODE)) return res.status(403).send("Unauthed");
+    if (!(req.body.accessCode && req.body.accessCode === process.env.REQUEST_ACCESS_CODE)) return res403(res);
 
-    if (req.body.isHardware === undefined) return res.status(400).send("Missing param");
+    if (req.body.isHardware === undefined) return res400(res);
 
     let checkParams = [req.body.name, req.body.email, req.body.firmwareVersion, req.body.manufacturerId, req.body.tier, req.body.team];
 
@@ -34,7 +35,7 @@ const handler: NextApiHandler = async (req, res) => {
         req.body.isFirmwareResponsibility,
     ];
 
-    if (checkParams.includes(undefined)) return res.status(400).send("Missing params");
+    if (checkParams.includes(undefined)) return res400(res);
 
     try {
         let modelId = req.body.modelId;
@@ -86,7 +87,7 @@ const handler: NextApiHandler = async (req, res) => {
 
             if (modelError) throw modelError;
 
-            if (!(modelData && modelData.length)) return res.status(500).send("Failed to create model");
+            if (!(modelData && modelData.length)) return res500(res, new Error("Failed to create model"));
 
             modelId = modelData[0].id;
         }
@@ -120,9 +121,9 @@ const handler: NextApiHandler = async (req, res) => {
 
         if (error) throw error;
 
-        if (data && data.length) return res.status(200).json({data: data[0]});
+        if (data && data.length) return res200(res, {data: data[0]});
     } catch (e) {
-        return res.status(500).send(e);
+        return res500(res, e);
     }
 }
 

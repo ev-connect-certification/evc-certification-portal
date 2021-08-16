@@ -77,4 +77,6 @@ export interface TestObj {
         pass: boolean,
         notes?: string,
     }[],
+    chargePointId?: string,
+    rfidIds?: string,
 }
