@@ -332,7 +332,7 @@ export default function RequestPage() {
                             <h3 className="font-bold text-base">Connectors ({connectors.length})</h3>
                             <SecondaryButton onClick={() => {
                                 setConnectors([...connectors, {...initConnector}]);
-                            }} className="ml-auto">Add connector</SecondaryButton>
+                            }} containerClassName="ml-auto">Add connector</SecondaryButton>
                         </div>
                         {connectors.map((connector, i) => (
                             <DarkSection key={i} light={true}>
