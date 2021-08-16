@@ -27,7 +27,7 @@ export default function RequestInfo({}: {}) {
     }, []);
 
     return (
-        <div className="max-w-5xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
+        <div className="max-w-6xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
             <SEO/>
             <RedirectIfSignedOut/>
             <H1 className="mb-4">Incoming certification requests</H1>
@@ -37,6 +37,7 @@ export default function RequestInfo({}: {}) {
                         <div className="w-32"><Label>Manufacturer</Label></div>
                         <div className="w-64"><Label>Model</Label></div>
                         <div className="w-32"><Label>Firmware version</Label></div>
+                        <div className="w-32"><Label>New hardware?</Label></div>
                         <div className="w-32"><Label>Request date</Label></div>
                         <div className="w-32"><Label>Tier</Label></div>
                         <div className="w-32"><Label>Status</Label></div>
@@ -47,6 +48,7 @@ export default function RequestInfo({}: {}) {
                             <div className="flex-shrink-0 w-32"><span>{request.manufacturers.name}</span></div>
                             <div className="flex-shrink-0 w-64"><span>{request.models.name}</span></div>
                             <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.firmwareVersion}</span></div>
+                            <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.isHardware ? "Yes" : "No"}</span></div>
                             <div className="flex-shrink-0 w-32 text-gray-1"><span>{format(new Date(request.requestDate), "MMMM d, yyyy")}</span></div>
                             <div className="flex-shrink-0 w-32 text-gray-1"><span>Tier {request.tier}</span></div>
                             <div className="flex-grow-1 flex items-center">
