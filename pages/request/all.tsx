@@ -5,19 +5,19 @@ import {supabase} from "../../lib/supabaseClient";
 import {ssrRedirect} from "../../lib/apiResponses";
 import RedirectIfSignedOut from "../../components/RedirectIfSignedOut";
 import {useEffect, useState} from "react";
-import {CertificationRequestObj} from "../../lib/types";
+import {CertificationRequestObj, TestObj} from "../../lib/types";
 import LinkWrapper from "../../components/LinkWrapper";
 import {format} from "date-fns";
 import Label from "../../components/Label";
 
 export default function RequestInfo({}: {}) {
-    const [requests, setRequests] = useState<(CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}})[] | null>(null);
+    const [requests, setRequests] = useState<(CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}} & {tests: TestObj[]})[] | null>(null);
 
     useEffect(() => {
         (async () => {
             const {data, error} = await supabase
                 .from<CertificationRequestObj>("requests")
-                .select("*, models (name), manufacturers (name)");
+                .select("*, models (name), manufacturers (name), tests (*)");
 
             if (error) console.log(error);
 
@@ -50,8 +50,8 @@ export default function RequestInfo({}: {}) {
                             <div className="flex-shrink-0 w-32 text-gray-1"><span>{format(new Date(request.requestDate), "MMMM d, yyyy")}</span></div>
                             <div className="flex-shrink-0 w-32 text-gray-1"><span>Tier {request.tier}</span></div>
                             <div className="flex-grow-1 flex items-center">
-                                <div className="rounded-full bg-yellow-300 w-2 h-2 mr-3"/>
-                                <div><span>Awaiting approval</span></div>
+                                <div className={`rounded-full ${request.tests.length ? "bg-yellow-300" : "border-2 border-yellow-300"} w-2 h-2 mr-3`}/>
+                                <div><span>Awaiting {request.tests.length ? "scheduling" : "approval"}</span></div>
                             </div>
                         </LinkWrapper>
                     ))}
