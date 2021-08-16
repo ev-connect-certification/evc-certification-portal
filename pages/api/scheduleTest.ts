@@ -37,6 +37,10 @@ const handler: NextApiHandler = async (req, res) => {
 
         if (!(data && data.length)) throw new Error("Failed to update test");
 
+        let thisTest = {...data[0]};
+
+        delete thisTest.accessCode;
+
         return res200(res, data[0]);
     } catch (e) {
         return res500(res, e);

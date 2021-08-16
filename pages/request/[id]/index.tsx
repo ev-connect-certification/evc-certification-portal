@@ -1,6 +1,12 @@
 import {GetServerSideProps} from "next";
-import {supabaseAdmin} from "../../../lib/supabaseAdmin";
-import {CertificationRequestObj, ManufacturerObj, ModelObj, TestObj} from "../../../lib/types";
+import {
+    CertificationRequestObj,
+    ManufacturerObj,
+    ModelObj,
+    PublicRequestObj,
+    PublicTestObj,
+    TestObj
+} from "../../../lib/types";
 import SEO from "../../../components/SEO";
 import LinkWrapper from "../../../components/LinkWrapper";
 import H1 from "../../../components/H1";
@@ -23,7 +29,7 @@ import {ssr404} from "../../../lib/apiResponses";
 import BackLink from "../../../components/BackLink";
 import ThreeColText from "../../../components/ThreeColText";
 
-export default function RequestPage({requestObj}: {requestObj: CertificationRequestObj & {models: ModelObj[]} & {manufacturers: ManufacturerObj}}) {
+export default function RequestPage({requestObj}: {requestObj: PublicRequestObj & {models: ModelObj[]} & {manufacturers: ManufacturerObj}}) {
     const {user} = Auth.useUser();
     const {addToast} = useToasts();
     const [approveOpen, setApproveOpen] = useState<boolean>(false);
@@ -54,7 +60,7 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
 
     useEffect(() => {
         (async () => {
-            const {data, error} = await supabase.from<TestObj>("tests")
+            const {data, error} = await supabase.from<PublicTestObj>("publicTests")
                 .select("*")
                 .eq("requestId", requestObj.id);
 
@@ -272,8 +278,8 @@ export const getServerSideProps: GetServerSideProps = async ({params}) => {
 
     if (!id || isNaN(Number(id))) return ssr404;
 
-    const {data, error} = await supabaseAdmin
-        .from<CertificationRequestObj>("requests")
+    const {data, error} = await supabase
+        .from<CertificationRequestObj>("publicRequests")
         .select("*, models (*), manufacturers (*)")
         .eq("id", +id);
 

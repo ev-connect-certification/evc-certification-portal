@@ -1,6 +1,6 @@
 import {GetServerSideProps} from "next";
 import {supabaseAdmin} from "../../../lib/supabaseAdmin";
-import {CertificationRequestObj, TestObj} from "../../../lib/types";
+import {CertificationRequestObj, PublicRequestObj, PublicTestObj, TestObj} from "../../../lib/types";
 import {ssr404} from "../../../lib/apiResponses";
 import SEO from "../../../components/SEO";
 import H1 from "../../../components/H1";
@@ -10,7 +10,7 @@ import {format} from "date-fns";
 import {TestStatus} from "../../../lib/labels";
 import H2 from "../../../components/H2";
 import PrimaryButton from "../../../components/PrimaryButton";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Modal from "../../../components/Modal";
 import SecondaryButton from "../../../components/SecondaryButton";
 import DarkSection from "../../../components/DarkSection";
@@ -25,10 +25,11 @@ import Select from "../../../components/Select";
 import TextArea from "../../../components/TextArea";
 import {supabase} from "../../../lib/supabaseClient";
 
-export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}} & {tests: TestObj[]}, testObj: TestObj}) {
+export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}} & {publicTests: PublicTestObj[]}, testObj: PublicTestObj}) {
     const {user} = Auth.useUser();
     const {addToast} = useToasts();
-    const [testObj, setTestObj] = useState<TestObj>(props.testObj);
+    const [testObj, setTestObj] = useState<PublicTestObj>(props.testObj);
+    const [oldAccessCode, setOldAccessCode] = useState<string>("");
 
     // scheduling states
     const [scheduleOpen, setScheduleOpen] = useState<boolean>(false);
@@ -90,9 +91,25 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
     const canSubmitTest = !!results.length && results.every(d => d.test);
     const testsPassed = results.every(d => d.pass);
 
-    const thisIndex = requestObj.tests
+    const thisIndex = requestObj.publicTests
         .sort((a, b) => +new Date(b.approveDate) - +new Date(a.approveDate))
         .findIndex(d => d.id === testObj.id);
+
+    useEffect(() => {
+        (async () => {
+            if (user) {
+                const {data, error} = await supabase.from("tests")
+                    .select("accessCode")
+                    .eq("id", testObj.id);
+
+                if (error) return addToast(error.message, {appearance: "error", autoDismiss: true});
+
+                if (!(data && data.length)) return addToast("Failed to fetch access code", {appearance: "error", autoDismiss: true});
+
+                setOldAccessCode(data[0].accessCode);
+            }
+        })()
+    }, [testObj]);
 
     return (
         <div className="max-w-5xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -107,7 +124,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
             {testObj.status === "approved" && (
                 <DarkSection>
                     <p className="text-sm text-gray-1">
-                        This test has been approved and is ready to be scheduled. {user && <span>Share this link and the access code <code className="bg-gray-1 p-1 rounded text-white">{testObj.accessCode}</code> with others to allow them to schedule the test.</span>}
+                        This test has been approved and is ready to be scheduled. {user && <span>Share this link and the access code <code className="bg-gray-1 p-1 rounded text-white">{oldAccessCode}</code> with others to allow them to schedule the test.</span>}
                     </p>
                     <PrimaryButton containerClassName="mt-4" onClick={() => setScheduleOpen(true)}>Schedule</PrimaryButton>
                 </DarkSection>
@@ -268,17 +285,17 @@ export const getServerSideProps: GetServerSideProps = async ({params}) => {
 
     if (!id || isNaN(Number(id)) || !testId || isNaN(Number(testId))) return ssr404;
 
-    const {data, error} = await supabaseAdmin
-        .from<CertificationRequestObj>("requests")
-        .select("*, models (name), manufacturers (name), tests (*)")
+    const {data, error} = await supabase
+        .from<PublicRequestObj>("publicRequests")
+        .select("*, models (name), manufacturers (name), publicTests (*)")
         .eq("id", +id);
 
     if (error) return ssr404;
 
     if (!(data && data.length)) return ssr404;
 
-    const {data: testData, error: testError} = await supabaseAdmin
-        .from<TestObj>("tests")
+    const {data: testData, error: testError} = await supabase
+        .from<PublicTestObj>("publicTests")
         .select("*")
         .eq("id", +testId);
 

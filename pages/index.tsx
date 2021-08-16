@@ -5,13 +5,12 @@ import DarkSection from "../components/DarkSection";
 import Label from "../components/Label";
 import Select from "../components/Select";
 import {supabase} from "../lib/supabaseClient";
-import {CertificationRequestObj, ManufacturerObj, ModelObj, testStatusOpts} from "../lib/types";
-import {useEffect, useState} from "react";
+import {ManufacturerObj, ModelObj, PublicRequestObj, testStatusOpts} from "../lib/types";
+import React, {useEffect, useState} from "react";
 import {getSelectStateProps} from "../lib/statePropUtils";
 import {useRouter} from "next/router";
 import {useToasts} from "react-toast-notifications";
 import LinkWrapper from "../components/LinkWrapper";
-import React from "react";
 
 export default function Home() {
     const router = useRouter();
@@ -22,8 +21,8 @@ export default function Home() {
     const [manufacturerId, setManufacturerId] = useState<number | null>(null);
     const [searchLoading, setSearchLoading] = useState<boolean>(false);
     const [searchResults, setSearchResults] = useState<(ModelObj &
-        {requests: (CertificationRequestObj &
-            {tests: {testDate: string, approveDate: string, status: testStatusOpts}[]}
+        {publicRequests: (PublicRequestObj &
+            {publicTests: {testDate: string, approveDate: string, status: testStatusOpts}[]}
         )[]}
     )[]>([]);
 
@@ -31,7 +30,7 @@ export default function Home() {
         setSearchLoading(true);
 
         let request = supabase.from("models")
-            .select("*, requests (*, tests (testDate, approveDate, status))")
+            .select("*, publicRequests (*, publicTests (testDate, approveDate, status))")
             .eq("manufacturerId", manufacturerId);
 
         if (modelId) request = request.eq("id", modelId);
@@ -99,10 +98,10 @@ export default function Home() {
                 </div>
             )}
             {searchResults.map(result => {
-                const processedRequests = result.requests.map(request => ({
+                const processedRequests = result.publicRequests.map(request => ({
                     id: request.id,
                     version: request.firmwareVersion,
-                    pass: request.tests && request.tests.length && request.tests.sort((
+                    pass: request.publicTests && request.publicTests.length && request.publicTests.sort((
                         a,
                         b
                     ) => +new Date(b.approveDate) - +new Date(a.approveDate))[0].status === "pass",

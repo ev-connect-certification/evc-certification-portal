@@ -40,7 +40,7 @@ export interface ConnectorType {
     maxCurrent: number,
 };
 
-export interface CertificationRequestObj {
+export interface PublicRequestObj {
     id: number,
     isHardware: boolean,
     requesterName: string,
@@ -53,6 +53,9 @@ export interface CertificationRequestObj {
     firmwareInfo?: string,
     nextUpdate?: string, // date
     isFirmwareResponsibility?: boolean,
+}
+
+export interface CertificationRequestObj extends PublicRequestObj {
     accessCode: string,
 }
 
@@ -63,10 +66,9 @@ export interface ManufacturerObj {
     name: string,
 }
 
-export interface TestObj {
+export interface PublicTestObj {
     id: number,
     requestId: number,
-    accessCode: string,
     approveDate: string, // date
     testDate: string, // date
     status: testStatusOpts,
@@ -78,4 +80,8 @@ export interface TestObj {
     }[],
     chargePointId?: string,
     rfidIds?: string,
+}
+
+export interface TestObj extends PublicTestObj {
+    accessCode: string,
 }
