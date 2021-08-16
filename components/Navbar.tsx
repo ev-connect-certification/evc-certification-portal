@@ -49,6 +49,7 @@ export default function Navbar({}: {}) {
             {user ? (
                 <SecondaryButton onClick={() => {
                     supabase.auth.signOut().then(() => {
+                        router.push("/auth/signin");
                         addToast("Successfully signed out", {appearance: "success", autoDismiss: true});
                     }).catch(e => {
                         addToast(`Failed to sign out: ${e}`, {appearance: "error", autoDismiss: true});
