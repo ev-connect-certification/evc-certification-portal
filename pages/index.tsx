@@ -63,7 +63,7 @@ export default function Home() {
                             <option value={d.id} key={`model-option-${d.id}`}>{d.name}</option>
                         ))}
                     </Select>
-                    <PrimaryButton className="row-start-2" onClick={() => null}>Search</PrimaryButton>
+                    <PrimaryButton containerClassName="row-start-2" onClick={() => null}>Search</PrimaryButton>
                 </div>
             </DarkSection>
         </div>

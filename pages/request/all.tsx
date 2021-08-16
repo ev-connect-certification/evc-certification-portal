@@ -43,20 +43,23 @@ export default function RequestInfo({}: {}) {
                         <div className="w-32"><Label>Status</Label></div>
                     </div>
                     <hr className="text-gray-1"/>
-                    {requests.map(request => (
-                        <LinkWrapper key={request.id} href={`/request/${request.id}`} className="flex h-12 items-center">
-                            <div className="flex-shrink-0 w-32"><span>{request.manufacturers.name}</span></div>
-                            <div className="flex-shrink-0 w-64"><span>{request.models.name}</span></div>
-                            <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.firmwareVersion}</span></div>
-                            <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.isHardware ? "Yes" : "No"}</span></div>
-                            <div className="flex-shrink-0 w-32 text-gray-1"><span>{format(new Date(request.requestDate), "MMMM d, yyyy")}</span></div>
-                            <div className="flex-shrink-0 w-32 text-gray-1"><span>Tier {request.tier}</span></div>
-                            <div className="flex-grow-1 flex items-center">
-                                <div className={`rounded-full ${request.tests.length ? "bg-yellow-300" : "border-2 border-yellow-300"} w-2 h-2 mr-3`}/>
-                                <div><span>Awaiting {request.tests.length ? "scheduling" : "approval"}</span></div>
-                            </div>
-                        </LinkWrapper>
-                    ))}
+                    {requests
+                        .sort((a, b) => +new Date(b.requestDate) - +new Date(a.requestDate))
+                        .map(request => (
+                            <LinkWrapper key={request.id} href={`/request/${request.id}`} className="flex h-12 items-center">
+                                <div className="flex-shrink-0 w-32"><span>{request.manufacturers.name}</span></div>
+                                <div className="flex-shrink-0 w-64"><span>{request.models.name}</span></div>
+                                <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.firmwareVersion}</span></div>
+                                <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.isHardware ? "Yes" : "No"}</span></div>
+                                <div className="flex-shrink-0 w-32 text-gray-1"><span>{format(new Date(request.requestDate), "MMMM d, yyyy")}</span></div>
+                                <div className="flex-shrink-0 w-32 text-gray-1"><span>Tier {request.tier}</span></div>
+                                <div className="flex-grow-1 flex items-center">
+                                    <div className={`rounded-full ${request.tests.length ? "bg-yellow-300" : "border-2 border-yellow-300"} w-2 h-2 mr-3`}/>
+                                    <div><span>Awaiting {request.tests.length ? "scheduling" : "approval"}</span></div>
+                                </div>
+                            </LinkWrapper>
+                        ))
+                    }
                 </>
             ) : (
                 <>

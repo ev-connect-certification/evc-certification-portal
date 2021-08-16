@@ -30,6 +30,8 @@ import {
 import {supabase} from "../../lib/supabaseClient";
 import axios from "axios";
 import {getTier} from "../../lib/labels";
+import {useRouter} from "next/router";
+import {useToasts} from "react-toast-notifications";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -41,6 +43,8 @@ const initConnector: ConnectorType = {
 };
 
 export default function RequestPage() {
+    const router = useRouter();
+    const {addToast} = useToasts();
     const [manufacturers, setManufacturers] = useState<ManufacturerObj[]>([]);
     const [models, setModels] = useState<ModelObj[]>([]);
     const [team, setTeam] = useState<teamOpts>("manufacturer");
@@ -142,7 +146,10 @@ export default function RequestPage() {
         }
 
         axios.post("/api/newRequest", postData)
-            .then(res => alert(res))
+            .then(res => {
+                router.push(`/request/${res.data.data.id}`);
+                addToast("Request submitted", {appearance: "success", autoDismiss: true});
+            })
             .catch(e => alert(e))
             .finally(() => setIsLoading(false));
     }
