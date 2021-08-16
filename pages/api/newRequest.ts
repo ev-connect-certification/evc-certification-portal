@@ -29,7 +29,7 @@ const handler: NextApiHandler = async (req, res) => {
         req.body.isWSSSingle,
     ] : [
         ...checkParams,
-        req.body.modelId,
+        req.body.modelIds,
         req.body.firmwareInfo,
         req.body.nextUpdate,
         req.body.isFirmwareResponsibility,
@@ -38,7 +38,7 @@ const handler: NextApiHandler = async (req, res) => {
     if (checkParams.includes(undefined)) return res400(res);
 
     try {
-        let modelId = req.body.modelId;
+        let modelIds = req.body.modelIds;
 
         const {name, email, team, firmwareVersion, tier, manufacturerId} = req.body;
 
@@ -89,7 +89,7 @@ const handler: NextApiHandler = async (req, res) => {
 
             if (!(modelData && modelData.length)) return res500(res, new Error("Failed to create model"));
 
-            modelId = modelData[0].id;
+            modelIds = [modelData[0].id];
         }
 
         let newRequest: Partial<CertificationRequestObj> = {
@@ -99,7 +99,6 @@ const handler: NextApiHandler = async (req, res) => {
             requesterTeam: team,
             firmwareVersion: firmwareVersion,
             tier: tier,
-            modelId: modelId,
             manufacturerId: manufacturerId,
             accessCode: generator.generate({length: 6, numbers: true,}),
         }
@@ -121,7 +120,18 @@ const handler: NextApiHandler = async (req, res) => {
 
         if (error) throw error;
 
-        if (data && data.length) return res200(res, {data: data[0]});
+        if (!(data && data.length)) throw "Failed to create model";
+
+        const {data: linkData, error: linkError} = await supabaseAdmin
+            .from("requestModelLinks")
+            .insert(modelIds.map(d => ({
+                modelId: d,
+                requestId: data[0].id,
+            })));
+
+        if (linkError) throw linkError;
+
+        return res200(res, {data: data[0]});
     } catch (e) {
         return res500(res, e);
     }

@@ -32,6 +32,7 @@ import {useRouter} from "next/router";
 import {useToasts} from "react-toast-notifications";
 import BackLink from "../../components/BackLink";
 import TextArea from "../../components/TextArea";
+import ReactSelect from "react-select";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -69,7 +70,7 @@ export default function RequestPage() {
     const [mountType, setMountType] = useState<mountTypeOpts>("Pedestal");
     const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
     const [modelConnectivity, setModelConnectivity] = useState<modelConnectivityOpts>("wifi");
-    const [modelId, setModelId] = useState<number | null>(null);
+    const [modelIds, setModelIds] = useState<number[]>([]);
     const [modelName, setModelName] = useState<string>("test");
     const [manufacturerId, setManufacturerId] = useState<number | null>(null);
     const [cardBrand, setCardBrand] = useState<string>("");
@@ -98,7 +99,7 @@ export default function RequestPage() {
 
             const firstManufacturerModel = ModelData.find(d => d.manufacturerId === ManufacturerData[0].id);
 
-            setModelId(firstManufacturerModel ? firstManufacturerModel.id : null);
+            setModelIds(firstManufacturerModel ? [firstManufacturerModel.id] : []);
         })();
     }, []);
 
@@ -138,7 +139,7 @@ export default function RequestPage() {
         } else {
             postData = {
                 ...postData,
-                modelId: modelId,
+                modelIds: modelIds,
                 firmwareInfo: firmwareInfo,
                 nextUpdate: nextUpdate,
                 isFirmwareResponsibility: isFirmwareResponsibility,
@@ -155,7 +156,7 @@ export default function RequestPage() {
     }
 
     const canSubmit = (
-        name && email && firmwareVersion && (modelId || modelName) && manufacturerId && accessCode && tier
+        name && email && firmwareVersion && (modelIds.length || modelName) && manufacturerId && accessCode && tier
         && (isHardware ? (
             connectors.length && connectors.every(d => (d.maxPower * d.maxVoltage * d.maxCurrent) > 0)
             && (!isCreditCard || (cardBrand)) && updateFrequency && nextUpdate && isWSS && isOCPP
@@ -164,6 +165,10 @@ export default function RequestPage() {
         ))
         && (!(team === "sales") || (businessValue && amountBusiness && urgencyLevel))
     );
+
+    const selectModelOptions = models
+        .filter(d => d.manufacturerId === manufacturerId)
+        .map(d => ({label: d.name, value: d.id.toString()}));
 
     return (
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -193,46 +198,33 @@ export default function RequestPage() {
             </DarkSection>
             <H2>Request information</H2>
             <DarkSection>
-                <Label className="mb-2">Request type</Label>
-                <div className="grid grid-cols-2">
-                    <Radio
-                        id="firmware"
-                        label="New firmware"
-                        name="request_type"
-                        checked={!isHardware}
-                        // @ts-ignore
-                        onChange={e => setIsHardware(!e.target.checked)}
-                    />
-                    <Radio
-                        id="hardware"
-                        label="New hardware"
-                        name="request_type"
-                        checked={isHardware}
-                        // @ts-ignore
-                        onChange={e => setIsHardware(e.target.checked)}
-                    />
-                </div>
-                <ThreeCol className="my-6">
+                <ThreeCol className="mb-6">
+                    <Label>Request type</Label>
+                    <Select {...getSelectStateProps(isHardware ? "hardware" : "firmware", d => setIsHardware(d === "hardware"))}>
+                        <option value="hardware">New hardware</option>
+                        <option value="firmware">New firmware</option>
+                    </Select>
                     <Label>Manufacturer</Label>
                     <Select {...getSelectStateProps(manufacturerId ? manufacturerId.toString() : "", d => setManufacturerId(+d))}>
                         {manufacturers.map(d => (
                             <option value={d.id} key={`manufacturer-option-${d.id}`}>{d.name}</option>
                         ))}
                     </Select>
-                    <Label>Model</Label>
-                    {isHardware ? (
-                        <Input {...getInputStateProps(modelName, setModelName)}/>
-                    ) : (
-                        <Select {...getSelectStateProps(modelId ? modelId.toString() : "", d => setModelId(+d))}>
-                            {models.filter(d => d.manufacturerId === manufacturerId).map(d => (
-                                <option value={d.id} key={`model-option-${d.id}`}>{d.name}</option>
-                            ))}
-                        </Select>
-                    )}
                     <Label>Firmware Version</Label>
                     <Input {...getInputStateProps(firmwareVersion, setFirmwareVersion)}/>
                 </ThreeCol>
-                <Label className="mb-2">Certification tier</Label>
+                <Label className="mb-2">Model{isHardware ? "" : "s"}</Label>
+                {isHardware ? (
+                    <Input {...getInputStateProps(modelName, setModelName)}/>
+                ) : (
+                    <ReactSelect
+                        isMulti={true}
+                        options={selectModelOptions}
+                        onChange={(newValue) => setModelIds(newValue.map(d => +d.value))}
+                        value={selectModelOptions.filter(d => modelIds.includes(+d.value))}
+                    />
+                )}
+                <Label className="mb-2 mt-6">Certification tier</Label>
                 <Select {...getSelectStateProps(tier.toString(), d => setTier(+d))}>
                     {Array(5).fill(0).map((d, i) => (
                         <option value={i + 1} key={i}>{getTier(i + 1)}</option>

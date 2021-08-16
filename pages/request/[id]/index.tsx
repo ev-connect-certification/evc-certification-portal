@@ -23,24 +23,7 @@ import {ssr404} from "../../../lib/apiResponses";
 import BackLink from "../../../components/BackLink";
 import ThreeColText from "../../../components/ThreeColText";
 
-export default function RequestPage({requestObj}: {requestObj: CertificationRequestObj & {models: ModelObj} & {manufacturers: ManufacturerObj}}) {
-    const {
-        connectors,
-        isCreditCard,
-        cardBrand,
-        paymentFeatures,
-        powerLevel,
-        mountType,
-        isConcurrent,
-        certificationSupport,
-        featureSupport,
-        isWifi,
-        isSIM,
-        isHubSatellite,
-        isWSSSingle,
-        updateFrequency,
-    } = requestObj.models;
-
+export default function RequestPage({requestObj}: {requestObj: CertificationRequestObj & {models: ModelObj[]} & {manufacturers: ManufacturerObj}}) {
     const {user} = Auth.useUser();
     const {addToast} = useToasts();
     const [approveOpen, setApproveOpen] = useState<boolean>(false);
@@ -91,7 +74,7 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
             {user && (
                 <BackLink href="/request/all">All requests</BackLink>
             )}
-            <H1 className="mb-4">Request: {requestObj.manufacturers.name} {requestObj.models.name} @ {requestObj.firmwareVersion}</H1>
+            <H1 className="mb-4">Request: {requestObj.manufacturers.name} {requestObj.models.map(d => d.name).join(", ")} @ {requestObj.firmwareVersion}</H1>
             <DarkSection>
                 <p className="text-gray-1 text-sm">
                     {user
@@ -161,11 +144,14 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
                     }} className="my-6"/>
                     <hr className="my-12 text-gray-1"/>
                     <H2 id="requestDetails">Request details</H2>
-                    <ThreeColText text={{
-                        Manufacturer: requestObj.manufacturers.name,
-                        Model: requestObj.models.name,
-                    }} className="my-6"/>
-                    {/*<hr className="my-6 text-gray-1"/>*/}
+                    <ThreeCol className="my-6">
+                        <Label>Manufacturer</Label>
+                        <p className="text-sm">{requestObj.manufacturers.name}</p>
+                        <Label>Models ({requestObj.models.length})</Label>
+                        <p className="text-sm col-span-2">
+                            {requestObj.models.map(d => d.name).join(", ")}
+                        </p>
+                    </ThreeCol>
                     <ThreeColText text={{
                         Type: requestObj.isHardware ? "New hardware" : "New software",
                         "Firmware Version": requestObj.firmwareVersion,
@@ -186,71 +172,95 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
                     )}
                     <hr className="my-12 text-gray-1"/>
                     <H2 id="modelInfo">Model information</H2>
-                    <ThreeColText text={{
-                        "Model Connectivity": isWifi ? isSIM ? "Both" : "WiFi" : "SIM",
-                        "Does this model need a hub satellite?": isHubSatellite ? "Yes" : "No",
-                        "Mount Type": mountType,
-                    }} className="my-6"/>
-                    <ThreeColText text={{
-                        "Power Level": "Level " + powerLevel,
-                        "Concurrent charges supported?": isConcurrent ? "Yes" : "No",
-                        "One webSocket connection per": isWSSSingle ? "Station" : "Connector",
-                    }} className="my-6"/>
-                    <hr className="my-6 text-gray-1"/>
-                    <ThreeColText text={{
-                        "RFID reader support": featureSupport.includes("rfid") ? "Yes" : "No",
-                        "Smart charging profiles support": featureSupport.includes("smart") ? "Yes" : "No",
-                        "Freevend mode support": featureSupport.includes("freevend") ? "Yes" : "No",
-                    }} className="my-6"/>
-                    <ThreeColText text={{
-                        "Throttling support": featureSupport.includes("throttling") ? "Yes" : "No",
-                        "Over-the-air firmware update support": featureSupport.includes("ota") ? "Yes" : "No",
-                        "Daisy-chaining support": featureSupport.includes("daisy") ? "Yes" : "No",
-                    }} className="my-6"/>
-                    <hr className="my-6 text-gray-1"/>
-                    <Label>Connectors ({connectors.length})</Label>
-                    {connectors.map((d, i) => (
-                        <DarkSection key={i}>
-                            <ThreeColText text={{
-                                "Connector Type": d.type,
-                                "Connector Format": d.format.substr(0, 1).toUpperCase() + d.format.substr(1),
-                                "Power Type": d.powerType,
-                            }} className="mb-6"/>
-                            <ThreeColText text={{
-                                "Max current (A)": d.maxCurrent + " A",
-                                "Max power (W)": d.maxPower + " W",
-                                "Max voltage (V)": d.maxVoltage + " V",
-                            }} className="mt-6"/>
-                        </DarkSection>
-                    ))}
-                    <hr className="my-6 text-gray-1"/>
-                    <ThreeCol>
-                        <Label>Credit card support?</Label>
-                        <p className="text-sm">{isCreditCard ? "Yes" : "No"}</p>
-                        {isCreditCard && (
-                            <>
-                                <Label>Card reader brand</Label>
-                                <p className="text-sm">{cardBrand}</p>
-                            </>
-                        )}
-                    </ThreeCol>
-                    <ThreeColText text={{
-                        "NFC support": paymentFeatures.includes("nfc") ? "Yes" : "No",
-                        "Chip support": paymentFeatures.includes("chip") ? "Yes" : "No",
-                        "Swipe support": paymentFeatures.includes("swipe") ? "Yes" : "No",
-                    }} className="my-6"/>
-                    <hr className="my-6 text-gray-1"/>
-                    <ThreeColText text={{
-                        "NTEP certification": certificationSupport.includes("ntep") ? "Yes" : "No",
-                        "CTEP certification": certificationSupport.includes("ctep") ? "Yes" : "No",
-                    }} className="my-6"/>
-                    {updateFrequency && (
-                        <>
-                            <hr className="my-6 text-gray-1"/>
-                            <Label className="mb-2">How often are firmware updates for this model?</Label>
-                            <p className="text-sm">{updateFrequency}</p>
-                        </>
-                    )}
+                    {requestObj.models.map(model => {
+                        const {
+                            connectors,
+                            isCreditCard,
+                            cardBrand,
+                            paymentFeatures,
+                            powerLevel,
+                            mountType,
+                            isConcurrent,
+                            certificationSupport,
+                            featureSupport,
+                            isWifi,
+                            isSIM,
+                            isHubSatellite,
+                            isWSSSingle,
+                            updateFrequency,
+                        } = model;
+
+                        return (
+                            <DarkSection key={`model-${model.id}`}>
+                                <H2>{model.name}</H2>
+                                <ThreeColText text={{
+                                    "Model Connectivity": isWifi ? isSIM ? "Both" : "WiFi" : "SIM",
+                                    "Does this model need a hub satellite?": isHubSatellite ? "Yes" : "No",
+                                    "Mount Type": mountType,
+                                }} className="my-6"/>
+                                <ThreeColText text={{
+                                    "Power Level": "Level " + powerLevel,
+                                    "Concurrent charges supported?": isConcurrent ? "Yes" : "No",
+                                    "One webSocket connection per": isWSSSingle ? "Station" : "Connector",
+                                }} className="my-6"/>
+                                <hr className="my-6 text-gray-1"/>
+                                <ThreeColText text={{
+                                    "RFID reader support": featureSupport.includes("rfid") ? "Yes" : "No",
+                                    "Smart charging profiles support": featureSupport.includes("smart") ? "Yes" : "No",
+                                    "Freevend mode support": featureSupport.includes("freevend") ? "Yes" : "No",
+                                }} className="my-6"/>
+                                <ThreeColText text={{
+                                    "Throttling support": featureSupport.includes("throttling") ? "Yes" : "No",
+                                    "Over-the-air firmware update support": featureSupport.includes("ota") ? "Yes" : "No",
+                                    "Daisy-chaining support": featureSupport.includes("daisy") ? "Yes" : "No",
+                                }} className="my-6"/>
+                                <hr className="my-6 text-gray-1"/>
+                                <Label>Connectors ({connectors.length})</Label>
+                                {connectors.map((d, i) => (
+                                    <DarkSection key={i} light={true}>
+                                        <ThreeColText text={{
+                                            "Connector Type": d.type,
+                                            "Connector Format": d.format.substr(0, 1).toUpperCase() + d.format.substr(1),
+                                            "Power Type": d.powerType,
+                                        }} className="mb-6"/>
+                                        <ThreeColText text={{
+                                            "Max current (A)": d.maxCurrent + " A",
+                                            "Max power (W)": d.maxPower + " W",
+                                            "Max voltage (V)": d.maxVoltage + " V",
+                                        }} className="mt-6"/>
+                                    </DarkSection>
+                                ))}
+                                <hr className="my-6 text-gray-1"/>
+                                <ThreeCol>
+                                    <Label>Credit card support?</Label>
+                                    <p className="text-sm">{isCreditCard ? "Yes" : "No"}</p>
+                                    {isCreditCard && (
+                                        <>
+                                            <Label>Card reader brand</Label>
+                                            <p className="text-sm">{cardBrand}</p>
+                                        </>
+                                    )}
+                                </ThreeCol>
+                                <ThreeColText text={{
+                                    "NFC support": paymentFeatures.includes("nfc") ? "Yes" : "No",
+                                    "Chip support": paymentFeatures.includes("chip") ? "Yes" : "No",
+                                    "Swipe support": paymentFeatures.includes("swipe") ? "Yes" : "No",
+                                }} className="my-6"/>
+                                <hr className="my-6 text-gray-1"/>
+                                <ThreeColText text={{
+                                    "NTEP certification": certificationSupport.includes("ntep") ? "Yes" : "No",
+                                    "CTEP certification": certificationSupport.includes("ctep") ? "Yes" : "No",
+                                }} className="my-6"/>
+                                {updateFrequency && (
+                                    <>
+                                        <hr className="my-6 text-gray-1"/>
+                                        <Label className="mb-2">How often are firmware updates for this model?</Label>
+                                        <p className="text-sm">{updateFrequency}</p>
+                                    </>
+                                )}
+                            </DarkSection>
+                        )
+                    })}
                 </div>
             </div>
         </div>
