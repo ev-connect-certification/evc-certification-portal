@@ -8,8 +8,12 @@ import {supabase} from "../lib/supabaseClient";
 import {ManufacturerObj, ModelObj} from "../lib/types";
 import {useEffect, useState} from "react";
 import {getSelectStateProps} from "../lib/statePropUtils";
+import {useRouter} from "next/router";
+import {useToasts} from "react-toast-notifications";
 
 export default function Home() {
+    const router = useRouter();
+    const {addToast} = useToasts();
     const [manufacturers, setManufacturers] = useState<ManufacturerObj[]>([]);
     const [models, setModels] = useState<ModelObj[]>([]);
     const [modelId, setModelId] = useState<number>(0);
@@ -32,6 +36,10 @@ export default function Home() {
             if (ModelData && ModelData.length) setModels(ModelData);
         })();
     }, []);
+
+    useEffect(() => {
+        if (router.query.newsignin) addToast("Successfully signed in", {appearance: "success", autoDismiss: true});
+    }, [router.query]);
 
     return (
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
