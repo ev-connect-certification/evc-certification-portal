@@ -31,6 +31,7 @@ import {getTier} from "../../lib/labels";
 import {useRouter} from "next/router";
 import {useToasts} from "react-toast-notifications";
 import BackLink from "../../components/BackLink";
+import TextArea from "../../components/TextArea";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -451,7 +452,7 @@ export default function RequestPage() {
                 ) : (
                     <>
                         <Label className="mb-2">What has been updated in the firmware?</Label>
-                        <Input
+                        <TextArea
                             value={firmwareInfo}
                             onChange={e => setFirmwareInfo((e.target as HTMLInputElement).value)}
                         />
