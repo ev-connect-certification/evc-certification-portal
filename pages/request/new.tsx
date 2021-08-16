@@ -1,6 +1,5 @@
 import SEO from "../../components/SEO";
 import H1 from "../../components/H1";
-import {FiArrowLeft} from "react-icons/fi";
 import H2 from "../../components/H2";
 import DarkSection from "../../components/DarkSection";
 import Input from "../../components/Input";
@@ -13,7 +12,6 @@ import Radio from "../../components/Radio";
 import PrimaryButton from "../../components/PrimaryButton";
 import SecondaryButton from "../../components/SecondaryButton";
 import {getCheckboxStateProps, getInputStateProps, getSelectStateProps} from "../../lib/statePropUtils";
-import LinkWrapper from "../../components/LinkWrapper";
 import {
     ConnectorType,
     connectorTypeFormatOpts,
@@ -32,6 +30,7 @@ import axios from "axios";
 import {getTier} from "../../lib/labels";
 import {useRouter} from "next/router";
 import {useToasts} from "react-toast-notifications";
+import BackLink from "../../components/BackLink";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -168,10 +167,7 @@ export default function RequestPage() {
     return (
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
             <SEO/>
-            <LinkWrapper className="flex items-center font-bold text-gray-1 mb-4" href="/request/info">
-                <FiArrowLeft/>
-                <div className="ml-2"><span>Back</span></div>
-            </LinkWrapper>
+            <BackLink href="/request/info">Back</BackLink>
             <H1 className="mb-4">Request new certification</H1>
             <H2>Requester information</H2>
             <DarkSection>

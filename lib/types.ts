@@ -57,12 +57,7 @@ export interface CertificationRequestObj {
     accessCode: string,
 }
 
-export interface CertificationTestObj {
-    status: certificationTestStatusOpts,
-    // wip
-}
-
-export type certificationTestStatusOpts = "pending" | "success" | "failed";
+export type testStatusOpts = "approved" | "scheduled" | "pass" | "fail";
 
 export interface ManufacturerObj {
     id: number,
@@ -75,7 +70,7 @@ export interface TestObj {
     accessCode: string,
     approveDate: string, // date
     testDate: string, // date
-    status: "approved" | "scheduled" | "pass" | "fail",
+    status: testStatusOpts,
     results: {
         test: string,
         tier: number,

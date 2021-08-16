@@ -1,38 +1,27 @@
 import {GetServerSideProps} from "next";
-import {supabaseAdmin} from "../../lib/supabaseAdmin";
-import {CertificationRequestObj, ManufacturerObj, ModelObj, TestObj} from "../../lib/types";
-import SEO from "../../components/SEO";
-import LinkWrapper from "../../components/LinkWrapper";
-import {FiArrowLeft} from "react-icons/fi";
-import H1 from "../../components/H1";
-import H2 from "../../components/H2";
-import ThreeCol from "../../components/ThreeCol";
-import Label from "../../components/Label";
-import {getTeam, getTier} from "../../lib/labels";
+import {supabaseAdmin} from "../../../lib/supabaseAdmin";
+import {CertificationRequestObj, ManufacturerObj, ModelObj, TestObj} from "../../../lib/types";
+import SEO from "../../../components/SEO";
+import LinkWrapper from "../../../components/LinkWrapper";
+import H1 from "../../../components/H1";
+import H2 from "../../../components/H2";
+import ThreeCol from "../../../components/ThreeCol";
+import Label from "../../../components/Label";
+import {getTeam, getTier, TestStatus} from "../../../lib/labels";
 import React, {useEffect, useState} from "react";
-import DarkSection from "../../components/DarkSection";
+import DarkSection from "../../../components/DarkSection";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import {Auth} from "@supabase/ui";
 import {format} from "date-fns";
-import PrimaryButton from "../../components/PrimaryButton";
-import Modal from "../../components/Modal";
-import SecondaryButton from "../../components/SecondaryButton";
-import {supabase} from "../../lib/supabaseClient";
+import PrimaryButton from "../../../components/PrimaryButton";
+import Modal from "../../../components/Modal";
+import SecondaryButton from "../../../components/SecondaryButton";
+import {supabase} from "../../../lib/supabaseClient";
 import {generate} from "generate-password";
 import {useToasts} from "react-toast-notifications";
-
-const ThreeColText = ({text, className}: {text: { [key: string]: string }, className?: string}) => {
-    return (
-        <ThreeCol className={className || ""}>
-            {Object.entries(text).map(([key, value]) => (
-                <React.Fragment key={key}>
-                    <Label>{key}</Label>
-                    <p className="text-sm">{value}</p>
-                </React.Fragment>
-            ))}
-        </ThreeCol>
-    );
-};
+import {ssr404} from "../../../lib/apiResponses";
+import BackLink from "../../../components/BackLink";
+import ThreeColText from "../../../components/ThreeColText";
 
 export default function RequestPage({requestObj}: {requestObj: CertificationRequestObj & {models: ModelObj} & {manufacturers: ManufacturerObj}}) {
     const {
@@ -100,12 +89,17 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
         <div className="max-w-5xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
             <SEO/>
             {user && (
-                <LinkWrapper className="flex items-center font-bold text-gray-1 mb-4" href="/request/all">
-                    <FiArrowLeft/>
-                    <div className="ml-2"><span>All requests</span></div>
-                </LinkWrapper>
+                <BackLink href="/request/all">All requests</BackLink>
             )}
             <H1 className="mb-4">Request: {requestObj.manufacturers.name} {requestObj.models.name} @ {requestObj.firmwareVersion}</H1>
+            <DarkSection>
+                <p className="text-gray-1">
+                    {user
+                        ? "Share the link of this page with anyone who needs to see the status of this request."
+                        : "Keep track of the link of this page. It's how you'll be able see the status of your request. If you are the requester, you will also be emailed if there are any updates."
+                    }
+                </p>
+            </DarkSection>
             <div className="flex items-stretch mt-6">
                 <div className="w-64 border-r pr-6 mr-6">
                     <div className="sticky top-16">
@@ -124,24 +118,24 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
                 <div className="w-full">
                     <H2 id="timeline">Timeline and results</H2>
                     <div className="flex items-center h-12">
-                        <div className="w-32"><Label>Type</Label></div>
-                        <div className="w-32"><Label>Date</Label></div>
-                        <div className="w-32"><Label>Status</Label></div>
+                        <div className="w-40"><Label>Type</Label></div>
+                        <div className="w-40"><Label>Date</Label></div>
+                        <div className="w-40"><Label>Status</Label></div>
                     </div>
                     <hr className="text-gray-1"/>
                     {tests && tests.map(test => (
-                        <div key={test.id} className="flex items-center h-12">
-                            <div className="w-32"><span>Certification testing</span></div>
-                            <div className="w-32 text-gray-1"><span>{test.testDate ? format(new Date(test.testDate), "MMMM d, yyyy") : "-"}</span></div>
+                        <LinkWrapper href={`/request/${requestObj.id}/${test.id}`} key={test.id} className="flex items-center h-12">
+                            <div className="w-40"><span>Certification testing</span></div>
+                            <div className="w-40 text-gray-1"><span>{test.testDate ? format(new Date(test.testDate), "MMMM d, yyyy") : "-"}</span></div>
                             <div className="w-48 text-gray-1 flex items-center">
-                                <div className="w-2 h-2 rounded-full bg-yellow-300 mr-3"/>
-                                <span>Awaiting scheduling</span>
+                                <TestStatus status={test.status}/>
                             </div>
-                        </div>
+                            <SecondaryButton containerClassName="ml-auto" href={`/request/${requestObj.id}/${test.id}`}>View details</SecondaryButton>
+                        </LinkWrapper>
                     ))}
                     <div className="flex items-center h-12">
-                        <div className="w-32"><span>Initial request</span></div>
-                        <div className="w-32 text-gray-1"><span>{format(new Date(requestObj.requestDate), "MMMM d, yyyy")}</span></div>
+                        <div className="w-40"><span>Initial request</span></div>
+                        <div className="w-40 text-gray-1"><span>{format(new Date(requestObj.requestDate), "MMMM d, yyyy")}</span></div>
                         <div className="w-48 text-gray-1 flex items-center">
                             <div className={`w-2 h-2 rounded-full ${approveDate ? "bg-green-500" : "bg-yellow-300"} mr-3`}/>
                             <span>{approveDate ? `Approved on ${format(new Date(approveDate), "MMMM d, yyyy")}` : "Awaiting approval"}</span>
@@ -266,16 +260,16 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
 export const getServerSideProps: GetServerSideProps = async ({params}) => {
     const {id} = params;
 
-    if (!id || isNaN(Number(id))) return {notFound: true};
+    if (!id || isNaN(Number(id))) return ssr404;
 
     const {data, error} = await supabaseAdmin
         .from<CertificationRequestObj>("requests")
         .select("*, models (*), manufacturers (*)")
         .eq("id", +id);
 
-    if (error) return {notFound: true};
+    if (error) return ssr404;
 
-    if (!(data && data.length)) return {notFound: true};
+    if (!(data && data.length)) return ssr404;
 
     return {props: {requestObj: data[0]}};
 }
