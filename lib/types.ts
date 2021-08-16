@@ -68,3 +68,18 @@ export interface ManufacturerObj {
     id: number,
     name: string,
 }
+
+export interface TestObj {
+    id: number,
+    requestId: number,
+    accessCode: string,
+    approveDate: string, // date
+    testDate: string, // date
+    status: "approved" | "scheduled" | "pass" | "fail",
+    results: {
+        test: string,
+        tier: number,
+        pass: boolean,
+        notes?: string,
+    }[],
+}

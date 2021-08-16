@@ -1,6 +1,6 @@
 import {GetServerSideProps} from "next";
 import {supabaseAdmin} from "../../lib/supabaseAdmin";
-import {CertificationRequestObj, ManufacturerObj, ModelObj} from "../../lib/types";
+import {CertificationRequestObj, ManufacturerObj, ModelObj, TestObj} from "../../lib/types";
 import SEO from "../../components/SEO";
 import LinkWrapper from "../../components/LinkWrapper";
 import {FiArrowLeft} from "react-icons/fi";
@@ -9,7 +9,7 @@ import H2 from "../../components/H2";
 import ThreeCol from "../../components/ThreeCol";
 import Label from "../../components/Label";
 import {getTeam, getTier} from "../../lib/labels";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import DarkSection from "../../components/DarkSection";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import {Auth} from "@supabase/ui";
@@ -17,6 +17,9 @@ import {format} from "date-fns";
 import PrimaryButton from "../../components/PrimaryButton";
 import Modal from "../../components/Modal";
 import SecondaryButton from "../../components/SecondaryButton";
+import {supabase} from "../../lib/supabaseClient";
+import {generate} from "generate-password";
+import {useToasts} from "react-toast-notifications";
 
 const ThreeColText = ({text, className}: {text: { [key: string]: string }, className?: string}) => {
     return (
@@ -50,7 +53,48 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
     } = requestObj.models;
 
     const {user} = Auth.useUser();
+    const {addToast} = useToasts();
     const [approveOpen, setApproveOpen] = useState<boolean>(false);
+    const [approveLoading, setApproveLoading] = useState<boolean>(false);
+    const [testsIter, setTestsIter] = useState<number>(0);
+    const [tests, setTests] = useState<TestObj[] | null>(null);
+
+    async function onApprove() {
+        setApproveLoading(true);
+
+        const {data, error} = await supabase.from<TestObj>("tests")
+            .insert([
+                {
+                    accessCode: generate({length: 6, numbers: true}),
+                    requestId: requestObj.id,
+                    status: "approved",
+                }
+            ]);
+
+        setApproveLoading(false);
+
+        if (error) return addToast(error, {appearance: "error", autoDismiss: true});
+
+        setApproveOpen(false);
+        setTestsIter(testsIter + 1);
+        addToast("Request approved", {appearance: "success", autoDismiss: true});
+    }
+
+    useEffect(() => {
+        (async () => {
+            const {data, error} = await supabase.from<TestObj>("tests")
+                .select("*")
+                .eq("requestId", requestObj.id);
+
+            if (error) return addToast(error, {appearance: "error", autoDismiss: true});
+
+            setTests(data);
+        })();
+    }, [testsIter]);
+
+    const approveDate = tests
+        && !!tests.length
+        && tests.sort((a, b) => +new Date(b.approveDate) - +new Date(a.approveDate))[0].approveDate;
 
     return (
         <div className="max-w-5xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -82,27 +126,35 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
                     <div className="flex items-center h-12">
                         <div className="w-32"><Label>Type</Label></div>
                         <div className="w-32"><Label>Date</Label></div>
-                        <div className="w-32"><Label>Tester</Label></div>
                         <div className="w-32"><Label>Status</Label></div>
                     </div>
                     <hr className="text-gray-1"/>
+                    {tests && tests.map(test => (
+                        <div key={test.id} className="flex items-center h-12">
+                            <div className="w-32"><span>Certification testing</span></div>
+                            <div className="w-32 text-gray-1"><span>{test.testDate ? format(new Date(test.testDate), "MMMM d, yyyy") : "-"}</span></div>
+                            <div className="w-48 text-gray-1 flex items-center">
+                                <div className="w-2 h-2 rounded-full bg-yellow-300 mr-3"/>
+                                <span>Awaiting scheduling</span>
+                            </div>
+                        </div>
+                    ))}
                     <div className="flex items-center h-12">
                         <div className="w-32"><span>Initial request</span></div>
                         <div className="w-32 text-gray-1"><span>{format(new Date(requestObj.requestDate), "MMMM d, yyyy")}</span></div>
-                        <div className="w-32 text-gray-1"><span>-</span></div>
                         <div className="w-48 text-gray-1 flex items-center">
-                            <div className="w-2 h-2 rounded-full bg-yellow-300 mr-3"/>
-                            <span>Awaiting approval</span>
+                            <div className={`w-2 h-2 rounded-full ${approveDate ? "bg-green-500" : "bg-yellow-300"} mr-3`}/>
+                            <span>{approveDate ? `Approved on ${format(new Date(approveDate), "MMMM d, yyyy")}` : "Awaiting approval"}</span>
                         </div>
-                        {user && (
-                            <PrimaryButton className="ml-auto" onClick={() => setApproveOpen(true)}>Approve for scheduling</PrimaryButton>
+                        {user && !approveDate && (
+                            <PrimaryButton containerClassName="ml-auto" onClick={() => setApproveOpen(true)}>Approve for scheduling</PrimaryButton>
                         )}
                     </div>
                     <Modal isOpen={approveOpen} setIsOpen={setApproveOpen}>
                         <H2 className="mb-4">Approve request for scheduling</H2>
                         <p className="text-sm my-4 text-gray-1">If you approve this request, an email will be sent to the requester allowing them to schedule a time for certification testing.</p>
                         <div className="flex items-center">
-                            <PrimaryButton onClick={() => null}>Approve</PrimaryButton>
+                            <PrimaryButton onClick={onApprove}>Approve</PrimaryButton>
                             <SecondaryButton onClick={() => setApproveOpen(false)} className="ml-2">Cancel</SecondaryButton>
                         </div>
                     </Modal>

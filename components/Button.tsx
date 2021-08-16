@@ -3,7 +3,9 @@ import Link from "next/link";
 
 interface ButtonPropsBase {
     children: ReactNode,
+    isLoading?: boolean,
     className?: string,
+    containerClassName?: string,
     disabled?: boolean,
 }
 
@@ -19,14 +21,23 @@ interface ButtonPropsButton extends ButtonPropsBase {
 
 export type ButtonProps = ButtonPropsLink | ButtonPropsButton;
 
-export default function Button({children, href, onClick, className, disabled}: ButtonProps) {
-    const classNames = " " + className;
+export default function Button({children, href, onClick, className, disabled, isLoading, containerClassName}: ButtonProps) {
+    const classNames = " " + (className || "");
 
-    return href ? (
-        <Link href={href}>
-            <a className={classNames}>{children}</a>
-        </Link>
-    ) : (
-        <button className={classNames} onClick={onClick} disabled={disabled}>{children}</button>
-    );
+    return (
+        <div className={"relative " + (containerClassName || "")}>
+            {href ? (
+                <Link href={href}>
+                    <a className={classNames}>
+                        <div className={isLoading ? "invisible" : ""}>{children}</div>
+                    </a>
+                </Link>
+            ) : (
+                <button className={classNames} onClick={onClick} disabled={disabled}>
+                    <div className={isLoading ? "invisible" : ""}>{children}</div>
+                </button>
+            )}
+            {isLoading && <div className="sz-spinner"/>}
+        </div>
+    )
 }

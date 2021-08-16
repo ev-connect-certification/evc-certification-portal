@@ -34,7 +34,7 @@ export default function Navbar({}: {}) {
     }, [user]);
 
     return (
-        <div className="h-12 w-full px-4 fixed top-0 left-0 bg-white border-b flex items-center">
+        <div className="h-12 w-full px-4 fixed top-0 left-0 bg-white border-b flex items-center z-10">
             <HomeLinkWrapper>
                 <img src="/logo.svg" alt="EV Connect logo" className="h-6"/>
             </HomeLinkWrapper>
@@ -45,7 +45,7 @@ export default function Navbar({}: {}) {
             {user && (
                 <Tab href="/request/all" selected={router.route === "/request/all"}>Requests</Tab>
             )}
-            <PrimaryButton className="ml-auto" href="/request/info">{user ? "Add request" : "Request certification"}</PrimaryButton>
+            <PrimaryButton containerClassName="ml-auto" href="/request/info">{user ? "Add request" : "Request certification"}</PrimaryButton>
             {user ? (
                 <SecondaryButton onClick={() => {
                     supabase.auth.signOut().then(() => {
