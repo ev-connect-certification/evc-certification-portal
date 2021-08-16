@@ -29,6 +29,7 @@ import {
 } from "../../lib/types";
 import {supabase} from "../../lib/supabaseClient";
 import axios from "axios";
+import {getTier} from "../../lib/labels";
 
 const initConnector: ConnectorType = {
     type: "CCS",
@@ -123,7 +124,10 @@ export default function RequestPage() {
                 mountType,
                 isConcurrent,
                 certificationSupport,
+                isHubSatellite,
+                isWSSSingle,
                 featureSupport,
+                updateFrequency,
                 isWifi: ["wifi", "both"].includes(modelConnectivity),
                 isSIM: ["sim", "both"].includes(modelConnectivity),
             }
@@ -226,11 +230,9 @@ export default function RequestPage() {
                 </ThreeCol>
                 <Label className="mb-2">Certification tier</Label>
                 <Select {...getSelectStateProps(tier.toString(), d => setTier(+d))}>
-                    <option value="1">Tier 1: Basic OCPP support</option>
-                    <option value="2">Tier 2: previous tiers, and RFID support</option>
-                    <option value="3">Tier 3: previous tiers, and Smart charging, freevend, credit card, hub satellite support</option>
-                    <option value="4">Tier 4: previous tiers, and ISO 15118 support</option>
-                    <option value="5">Tier 5: previous tiers, and Vehicle to Grid (V2G) support</option>
+                    {Array(5).fill(0).map((d, i) => (
+                        <option value={i + 1} key={i}>{getTier(i + 1)}</option>
+                    ))}
                 </Select>
                 <hr className="my-6 border-gray-2"/>
                 {isHardware ? (
@@ -342,7 +344,7 @@ export default function RequestPage() {
                                             <option value={type} key={`connector-${i}-${type}`}>{type}</option>
                                         ))}
                                     </Select>
-                                    <Label>Connector Type</Label>
+                                    <Label>Connector Format</Label>
                                     <Select value={connector.format} onChange={e => {
                                         let newConnectors = [...connectors];
                                         const target = e.target as HTMLSelectElement;

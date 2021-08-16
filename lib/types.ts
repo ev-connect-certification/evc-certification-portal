@@ -14,6 +14,9 @@ export interface ModelObj {
     fileKeys: string[],
     isWifi?: boolean,
     isSIM?: boolean,
+    isHubSatellite: boolean,
+    isWSSSingle: boolean,
+    updateFrequency?: string,
 }
 
 export type certificationSupportOpts = "ctep" | "ntep";
@@ -51,7 +54,7 @@ export interface CertificationRequestObj {
     firmwareInfo?: string,
     nextUpdate?: string, // date
     isFirmwareResponsibility?: boolean,
-    // wip
+    accessCode: string,
 }
 
 export interface CertificationTestObj {

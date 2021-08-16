@@ -1,6 +1,7 @@
 import {NextApiHandler} from "next";
 import {supabaseAdmin} from "../../lib/supabaseAdmin";
 import {CertificationRequestObj, ModelObj} from "../../lib/types";
+import generator from "generate-password";
 
 const handler: NextApiHandler = async (req, res) => {
     if (req.method !== "POST") return res.status(406).send("Invalid method");
@@ -23,6 +24,8 @@ const handler: NextApiHandler = async (req, res) => {
         req.body.featureSupport,
         req.body.isWifi,
         req.body.isSIM,
+        req.body.isHubSatellite,
+        req.body.isWSSSingle,
     ] : [
         ...checkParams,
         req.body.modelId,
@@ -53,6 +56,9 @@ const handler: NextApiHandler = async (req, res) => {
                 featureSupport,
                 isWifi,
                 isSIM,
+                isHubSatellite,
+                isWSSSingle,
+                updateFrequency,
             } = req.body;
 
             const newModel = {
@@ -70,6 +76,9 @@ const handler: NextApiHandler = async (req, res) => {
                 fileKeys: [],
                 isWifi: isWifi,
                 isSIM: isSIM,
+                isHubSatellite: isHubSatellite,
+                isWSSSingle: isWSSSingle,
+                updateFrequency: updateFrequency,
             }
 
             const {data: modelData, error: modelError} = await supabaseAdmin.from<ModelObj>("models")
@@ -91,6 +100,7 @@ const handler: NextApiHandler = async (req, res) => {
             tier: tier,
             modelId: modelId,
             manufacturerId: manufacturerId,
+            accessCode: generator.generate({length: 6, numbers: true,}),
         }
 
         if (!req.body.isHardware) {
