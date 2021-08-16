@@ -12,6 +12,7 @@ import {getTeam, getTier} from "../../lib/labels";
 import React from "react";
 import DarkSection from "../../components/DarkSection";
 import AnchorLink from "react-anchor-link-smooth-scroll";
+import {Auth} from "@supabase/ui";
 
 const ThreeColText = ({text, className}: {text: { [key: string]: string }, className?: string}) => {
     return (
@@ -44,9 +45,17 @@ export default function RequestPage({requestObj}: {requestObj: CertificationRequ
         updateFrequency,
     } = requestObj.models;
 
+    const {user} = Auth.useUser();
+
     return (
         <div className="max-w-5xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
             <SEO/>
+            {user && (
+                <LinkWrapper className="flex items-center font-bold text-gray-1 mb-4" href="/request/all">
+                    <FiArrowLeft/>
+                    <div className="ml-2"><span>All requests</span></div>
+                </LinkWrapper>
+            )}
             <H1 className="mb-4">Request: {requestObj.manufacturers.name} {requestObj.models.name} @ {requestObj.firmwareVersion}</H1>
             <div className="flex items-stretch mt-6">
                 <div className="w-64 border-r pr-6 mr-6">
