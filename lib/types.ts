@@ -30,6 +30,7 @@ export type connectorTypeFormatOpts = "cable" | "socket";
 export type connectorTypePowerTypeOpts = "DC" | "AC_1_PHASE" | "AC_3_PHASE";
 export type connectorTypeOpts = "SAE" | "SAE_COMBO" | "CHADEMO" | "CCS" | "CCS2" | "MENNEKES" | "MENNEKES_COMBO" | "SCAME_SOCKET" | "SCAME_CONNECTOR" | "TESLA_R" | "TESLA_S";
 export const connectorTypes = ["SAE", "SAE_COMBO", "CHADEMO", "CCS", "CCS2", "MENNEKES", "MENNEKES_COMBO", "SCAME_SOCKET", "SCAME_CONNECTOR", "TESLA_R", "TESLA_S"];
+export type urgencyLevelOpts = "high" | "medium" | "low";
 
 export interface ConnectorType {
     type: connectorTypeOpts,
@@ -55,7 +56,7 @@ export interface PublicRequestObj {
     isFirmwareResponsibility?: boolean,
     businessValue?: string,
     amountBusiness?: string,
-    urgencyLevel?: "high" | "medium" | "low",
+    urgencyLevel?: urgencyLevelOpts,
 }
 
 export interface CertificationRequestObj extends PublicRequestObj {

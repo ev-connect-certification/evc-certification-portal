@@ -23,7 +23,7 @@ import {
     ModelObj,
     mountTypeOpts,
     powerLevelOpts,
-    teamOpts
+    teamOpts, urgencyLevelOpts
 } from "../../lib/types";
 import {supabase} from "../../lib/supabaseClient";
 import axios from "axios";
@@ -77,7 +77,7 @@ export default function RequestPage() {
     const [accessCode, setAccessCode] = useState<string>("");
     const [businessValue, setBusinessValue] = useState<string>("");
     const [amountBusiness, setAmountBusiness] = useState<string>("");
-    const [urgencyLevel, setUrgencyLevel] = useState<string>("");
+    const [urgencyLevel, setUrgencyLevel] = useState<urgencyLevelOpts>("high");
     const [tier, setTier] = useState<number>(1);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -172,7 +172,7 @@ export default function RequestPage() {
         ) : (
             firmwareInfo && nextUpdate
         ))
-        && (!(team === "sales") || (businessValue && amountBusiness && urgencyLevel))
+        && (team !== "sales" || (businessValue && amountBusiness && urgencyLevel))
     );
 
     const selectModelOptions = models
