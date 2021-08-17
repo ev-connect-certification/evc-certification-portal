@@ -35,7 +35,7 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
     const [approveOpen, setApproveOpen] = useState<boolean>(false);
     const [approveLoading, setApproveLoading] = useState<boolean>(false);
     const [testsIter, setTestsIter] = useState<number>(0);
-    const [tests, setTests] = useState<TestObj[] | null>(null);
+    const [tests, setTests] = useState<PublicTestObj[] | null>(null);
 
     async function onApprove() {
         setApproveLoading(true);

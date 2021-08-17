@@ -24,10 +24,13 @@ import axios from "axios";
 import Select from "../../../components/Select";
 import TextArea from "../../../components/TextArea";
 import {supabase} from "../../../lib/supabaseClient";
+import {useRouter} from "next/router";
+import LinkWrapper from "../../../components/LinkWrapper";
 
 export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}} & {publicTests: PublicTestObj[]}, testObj: PublicTestObj}) {
     const {user} = Auth.useUser();
     const {addToast} = useToasts();
+    const router = useRouter();
     const [testObj, setTestObj] = useState<PublicTestObj>(props.testObj);
     const [oldAccessCode, setOldAccessCode] = useState<string>("");
 
@@ -43,6 +46,11 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
     const [resultsOpen, setResultsOpen] = useState<boolean>(false);
     const [results, setResults] = useState<{test: string, notes: string, pass: boolean, tier: number}[]>([]);
     const [resultsLoading, setResultsLoading] = useState<boolean>(false);
+
+    // re-schedule new test
+    const [reScheduleOpen, setReScheduleOpen] = useState<boolean>(false);
+    const [reScheduleTime, setReScheduleTime] = useState<string>("");
+    const [reScheduleLoading, setReScheduleLoading] = useState<boolean>(false);
 
     const requestObj = props.requestObj;
 
@@ -88,12 +96,36 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
         addToast("Submitted test results", {appearance: "success", autoDismiss: true});
     }
 
+    function onReSchedule() {
+        setReScheduleLoading(true);
+
+        axios.post("/api/scheduleTest", {
+            newTest: true,
+            requestId: requestObj.id,
+            chargePointId: testObj.chargePointId,
+            testDate: new Date(reScheduleTime),
+            rfidIds: testObj.rfidIds,
+            scheduleTime: reScheduleTime,
+            accessCode: accessCode,
+        }).then(res => {
+            addToast("Successfully scheduled re-test", {appearance: "success", autoDismiss: true});
+            setReScheduleLoading(false);
+            setReScheduleOpen(false);
+            router.push(`/request/${requestObj.id}/${res.data.id}`);
+        }).catch(e => {
+            setReScheduleLoading(false);
+        });
+    }
+
     const canSubmitTest = !!results.length && results.every(d => d.test);
     const testsPassed = results.every(d => d.pass);
 
     const thisIndex = requestObj.publicTests
-        .sort((a, b) => +new Date(b.approveDate) - +new Date(a.approveDate))
+        .sort((a, b) => +new Date(a.approveDate) - +new Date(b.approveDate))
         .findIndex(d => d.id === testObj.id);
+
+    const latestTest = requestObj.publicTests.sort((a, b) => +new Date(b.approveDate) - +new Date(a.approveDate))[0];
+    const isLaterTest = latestTest.id !== testObj.id;
 
     useEffect(() => {
         (async () => {
@@ -116,7 +148,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
             <SEO/>
             <BackLink href={`/request/${requestObj.id}`}>Back to request</BackLink>
             <H1 className="mb-6">Test #{thisIndex + 1}</H1>
-            {user && (
+            {user && testObj.status === "pass" && (
                 <DarkSection>
                     <p className="text-sm text-gray-1">Share this link with others to let them see the status of this test.</p>
                 </DarkSection>
@@ -140,6 +172,36 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                     )}
                 </DarkSection>
             )}
+            {testObj.status === "fail" && (
+                <DarkSection>
+                    <p className="text-sm text-gray-1">
+                        This test failed.
+                        {isLaterTest
+                            ? <span> A re-test was scheduled for <LinkWrapper className="underline" href={`/request/${requestObj.id}/${latestTest.id}`}>{format(new Date(latestTest.testDate), "MMMM d, yyyy 'at' h:mm a")}</LinkWrapper>.</span>
+                            : user
+                                ? <span> The hardware partner must fix their hardware or software and schedule another test. Share this link and the access code <code className="bg-gray-1 p-1 rounded text-white">{oldAccessCode}</code> to allow them to do so.</span>
+                                : " If you are the hardware partner, please fix your hardware or software and schedule another test using the access code emailed to you."
+                        }
+                    </p>
+                    {!user && !isLaterTest && (
+                        <PrimaryButton onClick={() => setReScheduleOpen(true)} containerClassName="mt-4">Schedule re-test</PrimaryButton>
+                    )}
+                    {isLaterTest && (
+                        <SecondaryButton href={`/request/${requestObj.id}/${latestTest.id}`} containerClassName="mt-4">See details</SecondaryButton>
+                    )}
+                </DarkSection>
+            )}
+            <Modal isOpen={reScheduleOpen} setIsOpen={setReScheduleOpen}>
+                <H2 className="mb-4">Schedule re-test</H2>
+                <p className="text-sm text-gray-1">Once you have fixed all issues related to the previous failing test, please schedule a new time to complete certification. The existing charge point ID and RFID IDs will be used.</p>
+                <div className="grid grid-cols-2 grid-flow-col grid-rows-2 gap-2 my-6">
+                    <Label>Re-test date</Label>
+                    <Input type="datetime-local" {...getInputStateProps(reScheduleTime, setReScheduleTime)}/>
+                    <Label>Access code</Label>
+                    <Input {...getInputStateProps(accessCode, setAccessCode)}/>
+                </div>
+                <PrimaryButton onClick={onReSchedule} disabled={!(accessCode && reScheduleTime)} isLoading={reScheduleLoading}>Schedule</PrimaryButton>
+            </Modal>
             <H2>Test information</H2>
             <ThreeColText text={{
                 "Model": `${requestObj.manufacturers.name} ${requestObj.models.name} @ ${requestObj.firmwareVersion}`,
@@ -303,5 +365,5 @@ export const getServerSideProps: GetServerSideProps = async ({params}) => {
 
     if (!(testData && testData.length)) return ssr404;
 
-    return {props: {requestObj: data[0], testObj: testData[0]}};
+    return {props: {requestObj: data[0], testObj: testData[0], key: testData[0].id}};
 }
