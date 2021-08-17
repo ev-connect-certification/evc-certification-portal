@@ -128,7 +128,7 @@ export default function Home() {
                 )
             })}
             <DarkSection className="mb-0 flex items-center">
-                <p className="text-sm text-gray-1">If the model you're looking for isn't listed here, that means we haven't certified it. To request a certification, click "Request Certification".</p>
+                <p className="text-sm text-gray-1">If the model or firmware version you're looking for isn't listed here, that means we haven't certified it. To request a certification, click "Request Certification".</p>
                 <PrimaryButton containerClassName="flex-shrink-0 ml-2" href="/request/info">Request certification</PrimaryButton>
             </DarkSection>
         </div>
