@@ -57,6 +57,8 @@ export interface PublicRequestObj {
     businessValue?: string,
     amountBusiness?: string,
     urgencyLevel?: urgencyLevelOpts,
+    isContractSigned?: boolean,
+    shipDate?: string, // date
 }
 
 export interface CertificationRequestObj extends PublicRequestObj {

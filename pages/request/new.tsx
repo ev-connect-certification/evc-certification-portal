@@ -78,6 +78,8 @@ export default function RequestPage() {
     const [businessValue, setBusinessValue] = useState<string>("");
     const [amountBusiness, setAmountBusiness] = useState<string>("");
     const [urgencyLevel, setUrgencyLevel] = useState<urgencyLevelOpts>("high");
+    const [isContractSigned, setIsContractSigned] = useState<boolean>(false);
+    const [shipDate, setShipDate] = useState<string>("");
     const [tier, setTier] = useState<number>(1);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -152,6 +154,8 @@ export default function RequestPage() {
                 businessValue,
                 amountBusiness,
                 urgencyLevel,
+                shipDate,
+                isContractSigned,
             }
         }
 
@@ -172,7 +176,7 @@ export default function RequestPage() {
         ) : (
             firmwareInfo && nextUpdate
         ))
-        && (team !== "sales" || (businessValue && amountBusiness && urgencyLevel))
+        && (team !== "sales" || (businessValue && amountBusiness && urgencyLevel && shipDate))
     );
 
     const selectModelOptions = models
@@ -508,8 +512,18 @@ export default function RequestPage() {
                     <DarkSection>
                         <Label className="mb-2">Is the contract and PO signed?</Label>
                         <div className="grid grid-cols-2">
-                            <Radio id="contract-yes" label="Yes" name="contract"/>
-                            <Radio id="contract-no" label="No" name="contract"/>
+                            <Radio
+                                id="contract-yes"
+                                label="Yes"
+                                name="contract"
+                                checked={isContractSigned}
+                                onChange={e => setIsContractSigned((e.target as HTMLInputElement).checked)}
+                            />
+                            <Radio
+                                id="contract-no" label="No" name="contract"
+                                checked={!isContractSigned}
+                                onChange={e => setIsContractSigned(!(e.target as HTMLInputElement).checked)}
+                            />
                         </div>
                         <ThreeCol className="my-6">
                             <Label>Business value of selling the unit?</Label>
@@ -524,7 +538,7 @@ export default function RequestPage() {
                             </Select>
                         </ThreeCol>
                         <Label className="mb-2">When are units planned on being shipped?</Label>
-                        <Input type="date"/>
+                        <Input type="date" {...getInputStateProps(shipDate, setShipDate)}/>
                     </DarkSection>
                 </>
             )}

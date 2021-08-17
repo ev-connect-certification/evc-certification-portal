@@ -35,7 +35,14 @@ const handler: NextApiHandler = async (req, res) => {
         req.body.isFirmwareResponsibility,
     ];
 
-    if (req.body.team === "sales") checkParams = [...checkParams, req.body.businessValue, req.body.amountBusiness, req.body.urgencyLevel];
+    if (req.body.team === "sales") checkParams = [
+        ...checkParams,
+        req.body.businessValue,
+        req.body.amountBusiness,
+        req.body.urgencyLevel,
+        req.body.isContractSigned,
+        req.body.shipDate,
+    ];
 
     if (checkParams.includes(undefined)) return res400(res);
 
@@ -106,13 +113,15 @@ const handler: NextApiHandler = async (req, res) => {
         }
 
         if (team === "sales") {
-            const {businessValue, amountBusiness, urgencyLevel} = req.body;
+            const {businessValue, amountBusiness, urgencyLevel, isContractSigned, shipDate} = req.body;
 
             newRequest = {
                 ...newRequest,
                 businessValue,
                 amountBusiness,
                 urgencyLevel,
+                isContractSigned,
+                shipDate: shipDate,
             };
         }
 

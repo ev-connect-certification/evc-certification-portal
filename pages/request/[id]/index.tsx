@@ -92,13 +92,18 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
             <div className="flex items-stretch mt-6">
                 <div className="w-64 border-r pr-6 mr-6">
                     <div className="sticky top-16">
-                        {["timeline", "requesterInfo", "requestDetails", "modelInfo"].map(d => (
+                        {(() => {
+                            let initOptions = ["timeline", "requesterInfo", "requestDetails", "modelInfo"];
+                            if (requestObj.requesterTeam === "sales") initOptions.splice(3, 0, "salesInfo");
+                            return initOptions;
+                        })().map(d => (
                             <p className="text-sm mb-3 text-gray-1">
                                 <AnchorLink href={`#${d}`} offset={56}>{{
                                     timeline: "Timeline and results",
                                     requesterInfo: "Requester info",
                                     requestDetails: "Request details",
                                     modelInfo: "Model info",
+                                    salesInfo: "Sales info",
                                 }[d]}</AnchorLink>
                             </p>
                         ))}
@@ -174,6 +179,21 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                                 <Label className="col-span-2">Will you be responsible for doing all over-the-air firmware updates?</Label>
                                 <p className="text-sm">{requestObj.isFirmwareResponsibility ? "Yes" : "No"}</p>
                             </ThreeCol>
+                        </>
+                    )}
+                    {requestObj.requesterTeam === "sales" && (
+                        <>
+                            <hr className="my-12 text-gray-1"/>
+                            <H2 id="salesInfo">Sales information</H2>
+                            <ThreeColText text={{
+                                "PO and contract signed": requestObj.isContractSigned ? "Yes" : "No",
+                                "Planned unit ship date": requestObj.shipDate ? format(new Date(requestObj.shipDate), "MMMM d, yyyy") : "-",
+                            }} className="mt-6"/>
+                            <ThreeColText text={{
+                                "Business value": requestObj.businessValue,
+                                "Amount of business": requestObj.amountBusiness,
+                                "Urgency level": requestObj.urgencyLevel.substr(0, 1).toUpperCase() + requestObj.urgencyLevel.substr(1),
+                            }} className="mt-6"/>
                         </>
                     )}
                     <hr className="my-12 text-gray-1"/>
