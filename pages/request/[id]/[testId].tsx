@@ -27,7 +27,7 @@ import {supabase} from "../../../lib/supabaseClient";
 import {useRouter} from "next/router";
 import LinkWrapper from "../../../components/LinkWrapper";
 
-export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}} & {manufacturers: {name: string}} & {publicTests: PublicTestObj[]}, testObj: PublicTestObj}) {
+export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}[]} & {manufacturers: {name: string}} & {publicTests: PublicTestObj[]}, testObj: PublicTestObj}) {
     const {user} = Auth.useUser();
     const {addToast} = useToasts();
     const router = useRouter();
@@ -204,7 +204,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
             </Modal>
             <H2>Test information</H2>
             <ThreeColText text={{
-                "Model": `${requestObj.manufacturers.name} ${requestObj.models.name} @ ${requestObj.firmwareVersion}`,
+                "Models": `${requestObj.manufacturers.name} ${requestObj.models.map(d => d.name).join(", ")} @ ${requestObj.firmwareVersion}`,
                 "Requester": `${requestObj.requesterName} (${requestObj.requesterEmail})`,
                 "Test information": `Tier ${requestObj.tier} for new ${requestObj.isHardware ? "hardware" : "software"}`
             }} className="my-6"/>
