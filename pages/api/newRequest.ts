@@ -35,15 +35,17 @@ const handler: NextApiHandler = async (req, res) => {
         req.body.isFirmwareResponsibility,
     ];
 
+    if (req.body.team === "sales") checkParams = [...checkParams, req.body.businessValue, req.body.amountBusiness, req.body.urgencyLevel];
+
     if (checkParams.includes(undefined)) return res400(res);
 
     try {
         let modelIds = req.body.modelIds;
 
-        const {name, email, team, firmwareVersion, tier, manufacturerId} = req.body;
+        const {name, email, team, firmwareVersion, tier, manufacturerId, isHardware} = req.body;
 
         // if new hardware, create model and update model ID
-        if (req.body.isHardware) {
+        if (isHardware) {
             const {
                 modelName,
                 connectors,
@@ -93,17 +95,28 @@ const handler: NextApiHandler = async (req, res) => {
         }
 
         let newRequest: Partial<CertificationRequestObj> = {
-            isHardware: req.body.isHardware,
+            isHardware: isHardware,
             requesterName: name,
             requesterEmail: email,
             requesterTeam: team,
-            firmwareVersion: firmwareVersion,
-            tier: tier,
-            manufacturerId: manufacturerId,
+            firmwareVersion,
+            tier,
+            manufacturerId,
             accessCode: generator.generate({length: 6, numbers: true,}),
         }
 
-        if (!req.body.isHardware) {
+        if (team === "sales") {
+            const {businessValue, amountBusiness, urgencyLevel} = req.body;
+
+            newRequest = {
+                ...newRequest,
+                businessValue,
+                amountBusiness,
+                urgencyLevel,
+            };
+        }
+
+        if (!isHardware) {
             const {firmwareInfo, nextUpdate, isFirmwareResponsibility} = req.body;
 
             newRequest = {

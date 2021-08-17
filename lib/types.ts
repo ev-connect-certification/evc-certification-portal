@@ -53,6 +53,9 @@ export interface PublicRequestObj {
     firmwareInfo?: string,
     nextUpdate?: string, // date
     isFirmwareResponsibility?: boolean,
+    businessValue?: string,
+    amountBusiness?: string,
+    urgencyLevel?: "high" | "medium" | "low",
 }
 
 export interface CertificationRequestObj extends PublicRequestObj {

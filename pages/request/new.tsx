@@ -146,6 +146,15 @@ export default function RequestPage() {
             }
         }
 
+        if (team === "sales") {
+            postData = {
+                ...postData,
+                businessValue,
+                amountBusiness,
+                urgencyLevel,
+            }
+        }
+
         axios.post("/api/newRequest", postData)
             .then(res => {
                 router.push(`/request/${res.data.data.id}`);
@@ -509,7 +518,9 @@ export default function RequestPage() {
                             <Input {...getInputStateProps(amountBusiness, setAmountBusiness)}/>
                             <Label>Urgency level for certification</Label>
                             <Select {...getSelectStateProps(urgencyLevel, setUrgencyLevel)}>
-                                <option value="test">test</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
                             </Select>
                         </ThreeCol>
                         <Label className="mb-2">When are units planned on being shipped?</Label>
