@@ -10,7 +10,7 @@ import {format} from "date-fns";
 import {TestStatus} from "../../../lib/labels";
 import H2 from "../../../components/H2";
 import PrimaryButton from "../../../components/PrimaryButton";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Modal from "../../../components/Modal";
 import SecondaryButton from "../../../components/SecondaryButton";
 import DarkSection from "../../../components/DarkSection";
@@ -46,6 +46,8 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
     const [resultsOpen, setResultsOpen] = useState<boolean>(false);
     const [results, setResults] = useState<{test: string, notes: string, pass: boolean, tier: number}[]>([]);
     const [resultsLoading, setResultsLoading] = useState<boolean>(false);
+    const [fileUploadIter, setFileUploadIter] = useState<number>(0);
+    const fileUploadRef = useRef<HTMLInputElement>(null);
 
     // re-schedule new test
     const [reScheduleOpen, setReScheduleOpen] = useState<boolean>(false);
@@ -117,7 +119,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
         });
     }
 
-    const canSubmitTest = !!results.length && results.every(d => d.test);
+    const canSubmitTest = !!results.length && results.every(d => d.test) && fileUploadRef.current && fileUploadRef.current.files[0];
     const testsPassed = results.every(d => d.pass);
 
     const thisIndex = requestObj.publicTests
@@ -284,7 +286,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                         setResults([...results, {test: "", notes: "", pass: true, tier: 1}]);
                     }}>Add test</PrimaryButton>
                 </div>
-                <div style={{maxHeight: "calc(100vh - 200px)"}} className="overflow-y-auto">
+                <div style={{maxHeight: "calc(100vh - 400px)"}} className="overflow-y-auto">
                     {!results.length && (
                         <p className="text-gray-1">Press "Add test" above to add test results.</p>
                     )}
@@ -333,6 +335,18 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                         </DarkSection>
                     ))}
                 </div>
+                <DarkSection>
+                    {results.every(d => d.pass) ? (
+                        <>
+                            <p className="text-gray-1 mb-4">All tests are passing, so this model/firmware and configuration will be marked as certified. The requester will be notified via email.</p>
+                            <Label>Upload configuration CSV</Label>
+                            <p className="text-gray-1 mb-2">Please upload a CSV of certified configuration parameters below.</p>
+                            <input type="file" ref={fileUploadRef} onChange={() => setFileUploadIter(fileUploadIter + 1)}/>
+                        </>
+                    ) : (
+                        <p className="text-gray-1">This test will be marked as failing and a re-test will need to be scheduled once errors are fixed. The requester will be notified via email.</p>
+                    )}
+                </DarkSection>
                 <div className="flex items-center mt-6">
                     <PrimaryButton onClick={onSubmitResults} isLoading={resultsLoading} disabled={!canSubmitTest}>Submit</PrimaryButton>
                     <SecondaryButton onClick={() => setResultsOpen(false)} containerClassName="ml-2">Cancel</SecondaryButton>

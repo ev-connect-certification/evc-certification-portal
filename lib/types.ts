@@ -85,6 +85,7 @@ export interface PublicTestObj {
     }[],
     chargePointId?: string,
     rfidIds?: string,
+    configurationFileKey?: string,
 }
 
 export interface TestObj extends PublicTestObj {
