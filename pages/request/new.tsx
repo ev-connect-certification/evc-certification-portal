@@ -170,7 +170,7 @@ export default function RequestPage() {
         name && email && firmwareVersion && (modelIds.length || modelName) && manufacturerId && accessCode && tier
         && (isHardware ? (
             connectors.length && connectors.every(d => (d.maxPower * d.maxVoltage * d.maxCurrent) > 0)
-            && (!isCreditCard || (cardBrand)) && updateFrequency && nextUpdate && isWSS && isOCPP
+            && (!isCreditCard || (cardBrand)) && updateFrequency && isWSS && isOCPP
         ) : (
             firmwareInfo && nextUpdate
         ))
@@ -439,7 +439,7 @@ export default function RequestPage() {
                             </>
                         )}
                         <hr className="my-6 border-gray-2"/>
-                        <div className="grid-cols-2 grid-flow-col grid-rows-2 gap-2">
+                        <div className="grid grid-cols-2 grid-flow-col gap-x-4 gap-y-2" style={{gridTemplateRows: "repeat(2, max-content)"}}>
                             <Label>Does this model support over-the-air software updates?</Label>
                             <Select {...getSelectStateProps(
                                 featureSupport.includes("ota") ? "yes" : "no",
