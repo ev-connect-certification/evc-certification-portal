@@ -7,7 +7,7 @@ export interface ModelObj {
     cardBrand?: string,
     paymentFeatures?: paymentFeaturesOpts[],
     powerLevel: powerLevelOpts,
-    mountType: mountTypeOpts,
+    mountType: mountTypeOpts[],
     isConcurrent?: boolean,
     featureSupport: featureSupportOpts[],
     fileKeys: string[],

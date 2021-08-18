@@ -66,7 +66,7 @@ export default function RequestPage() {
     const [isWSSSingle, setIsWSSSingle] = useState<boolean>(true);
     const [isConcurrent, setIsConcurrent] = useState<boolean>(false);
     const [powerLevel, setPowerLevel] = useState<powerLevelOpts>("Level 2");
-    const [mountType, setMountType] = useState<mountTypeOpts>("Pedestal");
+    const [mountType, setMountType] = useState<mountTypeOpts[]>(["Pedestal"]);
     const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
     const [modelConnectivity, setModelConnectivity] = useState<modelConnectivityOpts>("wifi");
     const [modelIds, setModelIds] = useState<number[]>([]);
@@ -265,6 +265,16 @@ export default function RequestPage() {
                             <p className="text-red-500">Both OCPP and WSS must be supported for certification to be conducted.</p>
                         )}
                         <hr className="my-6 border-gray-2"/>
+                        <Label className="mb-2">Supported mount types</Label>
+                        <ReactSelect
+                            options={[{label: "Pedestal", value: "pedestal"}, {
+                                label: "Pole",
+                                value: "pole"
+                            }, {label: "Wall", value: "wall"}]}
+                            isMulti={true}
+                            value={mountType.map(type => ({value: type.toLowerCase(), label: type}))}
+                            onChange={newValue => setMountType(newValue.map(d => d.label))}
+                        />
                         <ThreeCol className="my-6">
                             <Label>Model Connectivity</Label>
                             <Select {...getSelectStateProps(modelConnectivity, setModelConnectivity)}>
@@ -280,11 +290,20 @@ export default function RequestPage() {
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </Select>
-                            <Label>Mount type</Label>
-                            <Select {...getSelectStateProps(mountType, setMountType)}>
-                                <option value="pedestal">Pedestal</option>
-                                <option value="pole">Pole</option>
-                                <option value="wall">Wall</option>
+                            <Label>Over-the-air update support</Label>
+                            <Select {...getSelectStateProps(
+                                featureSupport.includes("ota") ? "yes" : "no",
+                                d => {
+                                    if (d === "yes") setFeatureSupport([...featureSupport, "ota"]);
+                                    else {
+                                        let newFeatureSupport = [...featureSupport];
+                                        const otaIndex = newFeatureSupport.findIndex(d => d === "ota");
+                                        newFeatureSupport.splice(otaIndex, 1);
+                                        setFeatureSupport(newFeatureSupport);
+                                    }
+                                })}>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
                             </Select>
                         </ThreeCol>
                         <ThreeCol className="my-6">
@@ -293,7 +312,7 @@ export default function RequestPage() {
                                 <option value="2">Level 2</option>
                                 <option value="3">Level 3</option>
                             </Select>
-                            <Label>Concurrent charges supported?</Label>
+                            <Label>Concurrent charges supported</Label>
                             <Select
                                 value={isConcurrent ? "Yes" : "No"}
                                 onChange={e => setIsConcurrent((e.target as HTMLSelectElement).value === "Yes")}>
@@ -439,28 +458,11 @@ export default function RequestPage() {
                             </>
                         )}
                         <hr className="my-6 border-gray-2"/>
-                        <div className="grid grid-cols-2 grid-flow-col gap-x-4 gap-y-2" style={{gridTemplateRows: "repeat(2, max-content)"}}>
-                            <Label>Does this model support over-the-air software updates?</Label>
-                            <Select {...getSelectStateProps(
-                                featureSupport.includes("ota") ? "yes" : "no",
-                                d => {
-                                    if (d === "yes") setFeatureSupport([...featureSupport, "ota"]);
-                                    else {
-                                        let newFeatureSupport = [...featureSupport];
-                                        const otaIndex = newFeatureSupport.findIndex(d => d === "ota");
-                                        newFeatureSupport.splice(otaIndex, 1);
-                                        setFeatureSupport(newFeatureSupport);
-                                    }
-                            })}>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                            </Select>
-                            <Label>How often are firmware updates for this model?</Label>
-                            <Input
-                                value={updateFrequency}
-                                onChange={e => setUpdateFrequency((e.target as HTMLInputElement).value)}
-                            />
-                        </div>
+                        <Label className="mb-2">How often are firmware updates for this model?</Label>
+                        <Input
+                            value={updateFrequency}
+                            onChange={e => setUpdateFrequency((e.target as HTMLInputElement).value)}
+                        />
                     </>
                 ) : (
                     <>

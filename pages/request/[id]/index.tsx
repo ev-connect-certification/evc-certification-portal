@@ -239,7 +239,7 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                                 <ThreeColText text={{
                                     "Model Connectivity": isWifi ? isSIM ? "Both" : "WiFi" : "SIM",
                                     "Does this model need a hub satellite?": isHubSatellite ? "Yes" : "No",
-                                    "Mount Type": mountType,
+                                    "Mount Type": mountType.join(", "),
                                 }} className="my-6"/>
                                 <ThreeColText text={{
                                     "Power Level": "Level " + powerLevel,
