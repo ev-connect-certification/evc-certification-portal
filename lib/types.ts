@@ -54,15 +54,15 @@ export interface PublicRequestObj {
     firmwareInfo?: string,
     nextUpdate?: string, // date
     isFirmwareResponsibility?: boolean,
+}
+
+export interface CertificationRequestObj extends PublicRequestObj {
+    accessCode: string,
     businessValue?: string,
     amountBusiness?: string,
     urgencyLevel?: urgencyLevelOpts,
     isContractSigned?: boolean,
     shipDate?: string, // date
-}
-
-export interface CertificationRequestObj extends PublicRequestObj {
-    accessCode: string,
 }
 
 export type testStatusOpts = "approved" | "scheduled" | "pass" | "fail";

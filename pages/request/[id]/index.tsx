@@ -36,6 +36,7 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
     const [approveLoading, setApproveLoading] = useState<boolean>(false);
     const [testsIter, setTestsIter] = useState<number>(0);
     const [tests, setTests] = useState<PublicTestObj[] | null>(null);
+    const [fullRequest, setFullRequest] = useState<CertificationRequestObj | null>(null);
 
     async function onApprove() {
         setApproveLoading(true);
@@ -64,11 +65,25 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                 .select("*")
                 .eq("requestId", requestObj.id);
 
-            if (error) return addToast(error, {appearance: "error", autoDismiss: true});
+            if (error) return addToast(error.message, {appearance: "error", autoDismiss: true});
 
             setTests(data);
         })();
     }, [testsIter]);
+    
+    useEffect(() => {
+        if (user) {
+            (async () => {
+                const {data, error} = await supabase.from<CertificationRequestObj>("requests")
+                    .select("*")
+                    .eq("id", requestObj.id);
+
+                if (error) return addToast(error.message, {appearance: "error", autoDismiss: true});
+
+                if (data && data.length) setFullRequest(data[0]);
+            })();
+        }
+    }, [user]);
 
     const approveDate = tests
         && !!tests.length
@@ -94,7 +109,7 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                     <div className="sticky top-16">
                         {(() => {
                             let initOptions = ["timeline", "requesterInfo", "requestDetails", "modelInfo"];
-                            if (requestObj.requesterTeam === "sales") initOptions.splice(3, 0, "salesInfo");
+                            if (requestObj.requesterTeam === "sales" && user && fullRequest) initOptions.splice(3, 0, "salesInfo");
                             return initOptions;
                         })().map(d => (
                             <p className="text-sm mb-3 text-gray-1">
@@ -181,18 +196,21 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                             </ThreeCol>
                         </>
                     )}
-                    {requestObj.requesterTeam === "sales" && (
+                    {requestObj.requesterTeam === "sales" && user && fullRequest && (
                         <>
                             <hr className="my-12 text-gray-1"/>
                             <H2 id="salesInfo">Sales information</H2>
+                            <DarkSection>
+                                <p className="text-sm text-gray-1">This information is only visible to logged-in admins.</p>
+                            </DarkSection>
                             <ThreeColText text={{
-                                "PO and contract signed": requestObj.isContractSigned ? "Yes" : "No",
-                                "Planned unit ship date": requestObj.shipDate ? format(new Date(requestObj.shipDate), "MMMM d, yyyy") : "-",
+                                "PO and contract signed": fullRequest.isContractSigned ? "Yes" : "No",
+                                "Planned unit ship date": fullRequest.shipDate ? format(new Date(fullRequest.shipDate), "MMMM d, yyyy") : "-",
                             }} className="mt-6"/>
                             <ThreeColText text={{
-                                "Business value": requestObj.businessValue,
-                                "Amount of business": requestObj.amountBusiness,
-                                "Urgency level": requestObj.urgencyLevel.substr(0, 1).toUpperCase() + requestObj.urgencyLevel.substr(1),
+                                "Business value": fullRequest.businessValue,
+                                "Amount of business": fullRequest.amountBusiness,
+                                "Urgency level": fullRequest.urgencyLevel.substr(0, 1).toUpperCase() + fullRequest.urgencyLevel.substr(1),
                             }} className="mt-6"/>
                         </>
                     )}
