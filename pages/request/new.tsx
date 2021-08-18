@@ -504,15 +504,9 @@ export default function RequestPage() {
                         <Label>Fault codes</Label>
                         <p className="mb-2 text-gray-1">Fill in <a href="" className="underline">this spreadsheet template</a> as described on the previous page</p>
                         <Input type="file" accept=".xls,.xlsx"/>
-                        <Label className="mt-6">Manuals</Label>
-                        <p className="mb-2 text-gray-1">Upload any installation or usage manuals related to this model</p>
+                        <Label className="mt-6">Manuals and data sheets</Label>
+                        <p className="mb-2 text-gray-1">Upload any installation/usage manuals or data/spec sheets related to this model</p>
                         <Input type="file" multiple/>
-                        <Label className="mt-6">Data/spec sheets</Label>
-                        <p className="mb-2 text-gray-1">Upload any data or spec sheets for this model</p>
-                        <Input type="file"/>
-                        <Label className="mt-6">Certificates</Label>
-                        <p className="mb-2 text-gray-1">Upload any third-party certification certificates for this model</p>
-                        <Input type="file"/>
                     </DarkSection>
                 </>
             )}

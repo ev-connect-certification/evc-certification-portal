@@ -10,12 +10,13 @@ export interface ModelObj {
     mountType: mountTypeOpts[],
     isConcurrent?: boolean,
     featureSupport: featureSupportOpts[],
-    fileKeys: string[],
     isWifi?: boolean,
     isSIM?: boolean,
     isHubSatellite: boolean,
     isWSSSingle: boolean,
     updateFrequency?: string,
+    faultCodeFileKey?: string,
+    otherFileKeys?: string[],
 }
 
 export type paymentFeaturesOpts = "nfc" | "chip" | "swipe";
