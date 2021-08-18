@@ -150,7 +150,7 @@ const handler: NextApiHandler = async (req, res) => {
 
         if (linkError) throw linkError;
 
-        return res200(res, {data: data[0]});
+        return res200(res, {data: data[0], modelIds: modelIds});
     } catch (e) {
         return res500(res, e);
     }

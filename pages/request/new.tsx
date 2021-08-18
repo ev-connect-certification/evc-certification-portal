@@ -162,8 +162,30 @@ export default function RequestPage() {
 
         axios.post("/api/newRequest", postData)
             .then(res => {
-                router.push(`/request/${res.data.data.id}`);
-                addToast("Request submitted", {appearance: "success", autoDismiss: true});
+                if (isHardware) {
+                    const formData = new FormData();
+                    formData.append("faultCode", faultCodeFileUploadRef.current.files[0]);
+
+                    for (let i = 0; i < otherFilesUploadRef.current.files.length; i++) {
+                        formData.append("otherFiles", otherFilesUploadRef.current.files.item(i));
+                    }
+
+                    axios
+                        .post(
+                        `/api/uploadModelFiles?manufacturerId=${manufacturerId}&modelId=${res.data.modelIds[0]}&accessCode=${accessCode}`,
+                            formData
+                        )
+                        .catch(e => {
+                            addToast(`File upload failed with error: ${e}`, {appearance: "error", autoDismiss: true});
+                        })
+                        .finally(() => {
+                            router.push(`/request/${res.data.data.id}`);
+                            addToast("Request submitted", {appearance: "success", autoDismiss: true});
+                        });
+                } else {
+                    router.push(`/request/${res.data.data.id}`);
+                    addToast("Request submitted", {appearance: "success", autoDismiss: true});
+                }
             })
             .catch(e => alert(e))
             .finally(() => setIsLoading(false));
@@ -507,7 +529,7 @@ export default function RequestPage() {
                     <DarkSection>
                         <Label>Fault codes (required)</Label>
                         <p className="mb-2 text-gray-1">Fill in <a href="" className="underline">this spreadsheet template</a> as described on the previous page</p>
-                        <input type="file" accept=".xls,.xlsx" ref={faultCodeFileUploadRef}/>
+                        <input type="file" accept=".xlsx" ref={faultCodeFileUploadRef}/>
                         <Label className="mt-6">Manuals and data sheets (optional)</Label>
                         <p className="mb-2 text-gray-1">Upload any installation/usage manuals or data/spec sheets related to this model</p>
                         <input type="file" multiple ref={otherFilesUploadRef}/>

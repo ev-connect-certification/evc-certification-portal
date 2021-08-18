@@ -15,8 +15,6 @@ export interface ModelObj {
     isHubSatellite: boolean,
     isWSSSingle: boolean,
     updateFrequency?: string,
-    faultCodeFileKey?: string,
-    otherFileKeys?: string[],
 }
 
 export type paymentFeaturesOpts = "nfc" | "chip" | "swipe";
@@ -85,7 +83,6 @@ export interface PublicTestObj {
     }[],
     chargePointId?: string,
     rfidIds?: string,
-    configurationFileKey?: string,
 }
 
 export interface TestObj extends PublicTestObj {

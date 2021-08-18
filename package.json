@@ -20,6 +20,7 @@
     "generate-password": "^1.6.1",
     "mongodb": "^4.1.0",
     "mongoose": "^5.13.7",
+    "multiparty": "^4.2.2",
     "next": "10.0.5",
     "next-seo": "^4.26.0",
     "nprogress": "^0.2.0",
