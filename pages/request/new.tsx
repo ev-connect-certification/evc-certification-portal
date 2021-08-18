@@ -6,7 +6,7 @@ import Input from "../../components/Input";
 import Label from "../../components/Label";
 import ThreeCol from "../../components/ThreeCol";
 import Select from "../../components/Select";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Checkbox from "../../components/Checkbox";
 import Radio from "../../components/Radio";
 import PrimaryButton from "../../components/PrimaryButton";
@@ -81,6 +81,9 @@ export default function RequestPage() {
     const [shipDate, setShipDate] = useState<string>("");
     const [tier, setTier] = useState<number>(1);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const faultCodeFileUploadRef = useRef<HTMLInputElement>(null);
+    const otherFilesUploadRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         (async () => {
@@ -171,6 +174,7 @@ export default function RequestPage() {
         && (isHardware ? (
             connectors.length && connectors.every(d => (d.maxPower * d.maxVoltage * d.maxCurrent) > 0)
             && (!isCreditCard || (cardBrand)) && updateFrequency && isWSS && isOCPP
+            && faultCodeFileUploadRef.current && faultCodeFileUploadRef.current.files[0]
         ) : (
             firmwareInfo && nextUpdate
         ))
@@ -501,12 +505,12 @@ export default function RequestPage() {
                 <>
                     <H2>Model documents</H2>
                     <DarkSection>
-                        <Label>Fault codes</Label>
+                        <Label>Fault codes (required)</Label>
                         <p className="mb-2 text-gray-1">Fill in <a href="" className="underline">this spreadsheet template</a> as described on the previous page</p>
-                        <Input type="file" accept=".xls,.xlsx"/>
-                        <Label className="mt-6">Manuals and data sheets</Label>
+                        <input type="file" accept=".xls,.xlsx" ref={faultCodeFileUploadRef}/>
+                        <Label className="mt-6">Manuals and data sheets (optional)</Label>
                         <p className="mb-2 text-gray-1">Upload any installation/usage manuals or data/spec sheets related to this model</p>
-                        <Input type="file" multiple/>
+                        <input type="file" multiple ref={otherFilesUploadRef}/>
                     </DarkSection>
                 </>
             )}
