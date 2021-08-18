@@ -57,7 +57,6 @@ export default function RequestPage() {
     const [isWSS, setIsWSS] = useState<boolean>(false);
     const [isCreditCard, setIsCreditCard] = useState<boolean>(false);
     const [paymentFeatures, setPaymentFeatures] = useState<string[]>([]);
-    const [certificationSupport, setCertificationSupport] = useState<string[]>([]);
     const [featureSupport, setFeatureSupport] = useState<string[]>([]);
     const [updateFrequency, setUpdateFrequency] = useState<string>("");
     const [firmwareInfo, setFirmwareInfo] = useState<string>("");
@@ -130,7 +129,6 @@ export default function RequestPage() {
                 powerLevel,
                 mountType,
                 isConcurrent,
-                certificationSupport,
                 isHubSatellite,
                 isWSSSingle,
                 featureSupport,
@@ -327,8 +325,8 @@ export default function RequestPage() {
                             />
                             <Checkbox id="throttling" label="Throttling"
                                 {...getCheckboxStateProps(featureSupport, setFeatureSupport, "throttling")}/>
-                            <Checkbox id="ota" label="Over-the-air firmware updates"
-                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "ota")}/>
+                            <Checkbox id="ctepOrNtep" label="CTEP/NTEP certification"
+                                {...getCheckboxStateProps(featureSupport, setFeatureSupport, "ctepOrNtep")}/>
                             <Checkbox id="daisy" label="Daisy-chaining"
                                 {...getCheckboxStateProps(featureSupport, setFeatureSupport, "daisyChaining")}/>
                         </div>
@@ -441,18 +439,28 @@ export default function RequestPage() {
                             </>
                         )}
                         <hr className="my-6 border-gray-2"/>
-                        <Label className="mt-8">Certification support (check all that apply):</Label>
-                        <Checkbox id="ctep" label="CTEP certification support" className="my-2"
-                            {...getCheckboxStateProps(certificationSupport, setCertificationSupport, "ctep")}
-                        />
-                        <Checkbox id="ntep" label="NTEP certification support" className="my-2"
-                            {...getCheckboxStateProps(certificationSupport, setCertificationSupport, "ntep")}/>
-                        <hr className="my-6 border-gray-2"/>
-                        <Label className="mt-8 mb-2">How often are firmware updates for this model?</Label>
-                        <Input
-                            value={updateFrequency}
-                            onChange={e => setUpdateFrequency((e.target as HTMLInputElement).value)}
-                        />
+                        <div className="grid-cols-2 grid-flow-col grid-rows-2 gap-2">
+                            <Label>Does this model support over-the-air software updates?</Label>
+                            <Select {...getSelectStateProps(
+                                featureSupport.includes("ota") ? "yes" : "no",
+                                d => {
+                                    if (d === "yes") setFeatureSupport([...featureSupport, "ota"]);
+                                    else {
+                                        let newFeatureSupport = [...featureSupport];
+                                        const otaIndex = newFeatureSupport.findIndex(d => d === "ota");
+                                        newFeatureSupport.splice(otaIndex, 1);
+                                        setFeatureSupport(newFeatureSupport);
+                                    }
+                            })}>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </Select>
+                            <Label>How often are firmware updates for this model?</Label>
+                            <Input
+                                value={updateFrequency}
+                                onChange={e => setUpdateFrequency((e.target as HTMLInputElement).value)}
+                            />
+                        </div>
                     </>
                 ) : (
                     <>

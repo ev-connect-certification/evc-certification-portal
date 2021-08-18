@@ -225,7 +225,6 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                             powerLevel,
                             mountType,
                             isConcurrent,
-                            certificationSupport,
                             featureSupport,
                             isWifi,
                             isSIM,
@@ -255,7 +254,7 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                                 }} className="my-6"/>
                                 <ThreeColText text={{
                                     "Throttling support": featureSupport.includes("throttling") ? "Yes" : "No",
-                                    "Over-the-air firmware update support": featureSupport.includes("ota") ? "Yes" : "No",
+                                    "CTEP/NTEP certification support": featureSupport.includes("ctepOrNtep") ? "Yes" : "No",
                                     "Daisy-chaining support": featureSupport.includes("daisy") ? "Yes" : "No",
                                 }} className="my-6"/>
                                 <hr className="my-6 text-gray-1"/>
@@ -276,7 +275,9 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                                 ))}
                                 <hr className="my-6 text-gray-1"/>
                                 <ThreeCol>
-                                    <Label>Credit card support?</Label>
+                                    <Label>Over-the-air firmware updates</Label>
+                                    <p className="text-sm">{featureSupport.includes("ota") ? "Yes" : "No"}</p>
+                                    <Label>Credit card support</Label>
                                     <p className="text-sm">{isCreditCard ? "Yes" : "No"}</p>
                                     {isCreditCard && (
                                         <>
@@ -289,11 +290,6 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                                     "NFC support": paymentFeatures.includes("nfc") ? "Yes" : "No",
                                     "Chip support": paymentFeatures.includes("chip") ? "Yes" : "No",
                                     "Swipe support": paymentFeatures.includes("swipe") ? "Yes" : "No",
-                                }} className="my-6"/>
-                                <hr className="my-6 text-gray-1"/>
-                                <ThreeColText text={{
-                                    "NTEP certification": certificationSupport.includes("ntep") ? "Yes" : "No",
-                                    "CTEP certification": certificationSupport.includes("ctep") ? "Yes" : "No",
                                 }} className="my-6"/>
                                 {updateFrequency && (
                                     <>

@@ -9,7 +9,6 @@ export interface ModelObj {
     powerLevel: powerLevelOpts,
     mountType: mountTypeOpts,
     isConcurrent?: boolean,
-    certificationSupport: certificationSupportOpts[],
     featureSupport: featureSupportOpts[],
     fileKeys: string[],
     isWifi?: boolean,
@@ -19,9 +18,8 @@ export interface ModelObj {
     updateFrequency?: string,
 }
 
-export type certificationSupportOpts = "ctep" | "ntep";
 export type paymentFeaturesOpts = "nfc" | "chip" | "swipe";
-export type featureSupportOpts = "rfid" | "smart" | "freevend" | "throttling" | "ota" | "daisy";
+export type featureSupportOpts = "rfid" | "smart" | "freevend" | "throttling" | "ota" | "daisy" | "ctepOrNtep";
 export type teamOpts = "manufacturer" | "sales" | "other";
 export type powerLevelOpts = "Level 2" | "Level 3";
 export type mountTypeOpts = "Pedestal" | "Wall" | "Pole";
