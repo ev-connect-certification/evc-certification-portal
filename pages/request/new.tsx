@@ -70,7 +70,7 @@ export default function RequestPage() {
     const [isHubSatellite, setIsHubSatellite] = useState<boolean>(false);
     const [modelConnectivity, setModelConnectivity] = useState<modelConnectivityOpts>("wifi");
     const [modelIds, setModelIds] = useState<number[]>([]);
-    const [modelName, setModelName] = useState<string>("test");
+    const [modelName, setModelName] = useState<string>("");
     const [manufacturerId, setManufacturerId] = useState<number | null>(null);
     const [cardBrand, setCardBrand] = useState<string>("");
     const [accessCode, setAccessCode] = useState<string>("");
