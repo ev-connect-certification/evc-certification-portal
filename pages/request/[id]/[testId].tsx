@@ -260,7 +260,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                     "Time": <Input type="datetime-local" {...getInputStateProps(scheduleTime, setScheduleTime)}/>,
                 }} className="my-6"/>
                 <Label>Access code</Label>
-                <p className="mb-2 text-gray-1">Get the access code from your email</p>
+                <p className="mb-2 text-gray-1">An EV Connect team member should have emailed you this access code.</p>
                 <Input className="mb-6" {...getInputStateProps(accessCode, setAccessCode)}/>
                 <div className="flex">
                     <PrimaryButton
@@ -367,13 +367,13 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                 <DarkSection>
                     {testsPassed ? (
                         <>
-                            <p className="text-gray-1 mb-4">All tests are passing, so this model/firmware and configuration will be marked as certified. The requester will be notified via email.</p>
+                            <p className="text-gray-1 mb-4">All tests are passing, so this model/firmware and configuration will be marked as certified. The requester can view this status using the link of this page.</p>
                             <Label>Upload configuration CSV</Label>
                             <p className="text-gray-1 mb-2">Please upload a CSV of certified configuration parameters below.</p>
                             <input type="file" ref={fileUploadRef} onChange={() => setFileUploadIter(fileUploadIter + 1)}/>
                         </>
                     ) : (
-                        <p className="text-gray-1">This test will be marked as failing and a re-test will need to be scheduled once errors are fixed. The requester will be notified via email.</p>
+                        <p className="text-gray-1">This test will be marked as failing and a re-test will need to be scheduled once errors are fixed. The requester can schedule the re-test using the provided link and access code.</p>
                     )}
                 </DarkSection>
                 <div className="flex items-center mt-6">

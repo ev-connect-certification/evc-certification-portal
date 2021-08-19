@@ -156,7 +156,7 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                     </div>
                     <Modal isOpen={approveOpen} setIsOpen={setApproveOpen}>
                         <H2 className="mb-4">Approve request for scheduling</H2>
-                        <p className="text-sm my-4 text-gray-1">If you approve this request, an email will be sent to the requester allowing them to schedule a time for certification testing.</p>
+                        <p className="text-sm my-4 text-gray-1">If you approve this request, the requester will be able to schedule a time for certification testing using a provided link and access code.</p>
                         <div className="flex items-center">
                             <PrimaryButton onClick={onApprove}>Approve</PrimaryButton>
                             <SecondaryButton onClick={() => setApproveOpen(false)} className="ml-2">Cancel</SecondaryButton>
