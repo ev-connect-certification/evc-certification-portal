@@ -8,6 +8,7 @@ import React, {useEffect, useState} from "react";
 import {Auth} from "@supabase/ui";
 import {supabase} from "../lib/supabaseClient";
 import Button from "./Button";
+import DownloadButton from "./DownloadButton";
 
 export default function ModelSection({model}: {model: ModelObj}) {
     const {user} = Auth.useUser();
@@ -30,20 +31,6 @@ export default function ModelSection({model}: {model: ModelObj}) {
 
     const [faultCodeFileKey, setFaultCodeFileKey] = useState<string>("");
     const [otherFileKeys, setOtherFileKeys] = useState<string[]>([]);
-
-    async function downloadFile(key: string) {
-        const {data, error} = await supabase
-            .storage
-            .from("model-files")
-            .download(key);
-
-        if (error) return console.log(error);
-
-        if (data) {
-            const url = window.URL.createObjectURL(data);
-            window.location.href = url;
-        }
-    }
 
     useEffect(() => {
         if (user) {
@@ -137,17 +124,22 @@ export default function ModelSection({model}: {model: ModelObj}) {
             {faultCodeFileKey && (
                 <>
                     <Label className="mb-2 mt-6">Fault code file</Label>
-                    <Button
-                        className="underline text-sm"
-                        onClick={() => downloadFile(`${model.manufacturerId}/${model.id}/faultCode/${faultCodeFileKey}`)}
-                    >{faultCodeFileKey} (click to download)</Button>
+                    <DownloadButton
+                        bucketName="model-files"
+                        fileKey={faultCodeFileKey}
+                        filePath={`${model.manufacturerId}/${model.id}/faultCode/`}
+                    />
                 </>
             )}
             {!!otherFileKeys.length && (
                 <>
                     <Label className="mb-2 mt-6">Manuals, data sheets, and other documents</Label>
                     {otherFileKeys.map(fileKey => (
-                        <Button className="underline text-sm" onClick={() => downloadFile(`${model.manufacturerId}/${model.id}/other/${fileKey}`)}>{fileKey} (click to download)</Button>
+                        <DownloadButton
+                            bucketName="model-files"
+                            fileKey={fileKey}
+                            filePath={`${model.manufacturerId}/${model.id}/other/`}
+                        />
                     ))}
                 </>
             )}

@@ -26,6 +26,7 @@ import TextArea from "../../../components/TextArea";
 import {supabase} from "../../../lib/supabaseClient";
 import {useRouter} from "next/router";
 import LinkWrapper from "../../../components/LinkWrapper";
+import DownloadButton from "../../../components/DownloadButton";
 
 export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}[]} & {manufacturers: {name: string}} & {publicTests: PublicTestObj[]}, testObj: PublicTestObj}) {
     const {user} = Auth.useUser();
@@ -48,6 +49,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
     const [resultsLoading, setResultsLoading] = useState<boolean>(false);
     const [fileUploadIter, setFileUploadIter] = useState<number>(0);
     const fileUploadRef = useRef<HTMLInputElement>(null);
+    const [configFileKey, setConfigFileKey] = useState<string>("");
 
     // re-schedule new test
     const [reScheduleOpen, setReScheduleOpen] = useState<boolean>(false);
@@ -90,6 +92,18 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
         if (error) addToast(error.message, {appearance: "error", autoDismiss: true});
 
         if (!(data && data.length)) addToast("Failed to update test", {appearance: "error", autoDismiss: true});
+
+        if (testsPassed) {
+            try {
+                const formData = new FormData();
+
+                formData.append("config", fileUploadRef.current.files[0]);
+
+                const res = await axios.post(`/api/uploadTestFile?testId=${testObj.id}`, formData);
+            } catch (e) {
+                console.log(e);
+            }
+        }
 
         setTestObj(data[0]);
 
@@ -144,6 +158,21 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
             }
         })()
     }, [testObj]);
+
+    useEffect(() => {
+        if (user) {
+            (async () => {
+                const {data: configData, error: configError} = await supabase
+                    .storage
+                    .from("test-files")
+                    .list(`${testObj.id}`);
+
+                if (configError) console.log(configError);
+
+                if (configData && configData.length) setConfigFileKey(configData[0].name);
+            })();
+        }
+    }, [user]);
 
     return (
         <div className="max-w-5xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
@@ -336,7 +365,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                     ))}
                 </div>
                 <DarkSection>
-                    {results.every(d => d.pass) ? (
+                    {testsPassed ? (
                         <>
                             <p className="text-gray-1 mb-4">All tests are passing, so this model/firmware and configuration will be marked as certified. The requester will be notified via email.</p>
                             <Label>Upload configuration CSV</Label>
@@ -352,6 +381,14 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                     <SecondaryButton onClick={() => setResultsOpen(false)} containerClassName="ml-2">Cancel</SecondaryButton>
                 </div>
             </Modal>
+            <hr className="my-12 text-gray-1"/>
+            {configFileKey && (
+                <>
+                    <H2>Configuration file</H2>
+                    <p className="text-sm text-gray-1 my-4">The certified configuration file from testing is below.</p>
+                    <DownloadButton bucketName="test-files" fileKey={configFileKey} filePath={`${testObj.id}/`}/>
+                </>
+            )}
         </div>
     );
 }
