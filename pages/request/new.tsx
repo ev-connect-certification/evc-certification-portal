@@ -81,6 +81,7 @@ export default function RequestPage() {
     const [shipDate, setShipDate] = useState<string>("");
     const [tier, setTier] = useState<number>(1);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [fileIter, setFileIter] = useState<number>(0);
 
     const faultCodeFileUploadRef = useRef<HTMLInputElement>(null);
     const otherFilesUploadRef = useRef<HTMLInputElement>(null);
@@ -529,7 +530,7 @@ export default function RequestPage() {
                     <DarkSection>
                         <Label>Fault codes (required)</Label>
                         <p className="mb-2 text-gray-1">Fill in <a href="" className="underline">this spreadsheet template</a> as described on the previous page</p>
-                        <input type="file" accept=".xlsx" ref={faultCodeFileUploadRef}/>
+                        <input type="file" accept=".xlsx" ref={faultCodeFileUploadRef} onChange={() => setFileIter(fileIter + 1)}/>
                         <Label className="mt-6">Manuals and data sheets (optional)</Label>
                         <p className="mb-2 text-gray-1">Upload any installation/usage manuals or data/spec sheets related to this model</p>
                         <input type="file" multiple ref={otherFilesUploadRef}/>

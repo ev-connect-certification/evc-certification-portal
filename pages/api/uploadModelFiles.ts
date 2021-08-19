@@ -22,7 +22,7 @@ const handler: NextApiHandler = async (req, res) => {
     const form = new multiparty.Form();
 
     try {
-        form.parse(req, async (e, _, files) => {
+        await Promise.all(form.parse(req, async (e, _, files) => {
             // upload fault code file
 
             const faultCodeFile = files.faultCode[0];
@@ -43,23 +43,25 @@ const handler: NextApiHandler = async (req, res) => {
             if (error) throw error;
 
             const otherFiles = files.otherFiles;
-            for (let file of otherFiles) {
-                const fileBuffer = readFileSync(file.path);
+            if (otherFiles.length) {
+                for (let file of otherFiles) {
+                    const fileBuffer = readFileSync(file.path);
 
-                const {data, error} = await supabaseAdmin
-                    .storage
-                    .from("model-files")
-                    .upload(
-                        `${req.query.manufacturerId}/${req.query.modelId}/other/${file.originalFilename}`,
-                        fileBuffer,
-                        {contentType: file.headers["content-type"]},
-                    );
+                    const {data, error} = await supabaseAdmin
+                        .storage
+                        .from("model-files")
+                        .upload(
+                            `${req.query.manufacturerId}/${req.query.modelId}/other/${file.originalFilename}`,
+                            fileBuffer,
+                            {contentType: file.headers["content-type"]},
+                        );
 
-                if (error) throw error;
+                    if (error) throw error;
+                }
             }
 
             return res200(res, {});
-        });
+        }));
     } catch (e) {
         console.log(e);
         return res500(res, e);
