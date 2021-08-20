@@ -528,7 +528,7 @@ export default function RequestPage() {
                     <H2>Model documents</H2>
                     <DarkSection>
                         <Label>Fault codes (required)</Label>
-                        <p className="mb-2 text-gray-1">Fill in <a href="" className="underline">this spreadsheet template</a> as described on the previous page</p>
+                        <p className="mb-2 text-gray-1">Fill in <a href="https://evconnect-my.sharepoint.com/:x:/p/szhang1/EQuB6J-A3uNGnJDxEfFJh70BbGs-R37l4SV0VfbDT9LaAg?e=SKgiwj" className="underline">this spreadsheet template</a> as described on the previous page</p>
                         <input type="file" accept=".xlsx" ref={faultCodeFileUploadRef} onChange={() => setFileIter(fileIter + 1)}/>
                         <Label className="mt-6">Manuals and data sheets (optional)</Label>
                         <p className="mb-2 text-gray-1">Upload any installation/usage manuals or data/spec sheets related to this model</p>

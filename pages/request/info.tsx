@@ -45,7 +45,7 @@ export default function RequestInfo({}: {}) {
                     </ul>
                     <p>You will also need to upload following documents:</p>
                     <ul>
-                        <li>A filled-out fault code template detailing possible fault codes sent by the model and their
+                        <li>A filled-out <a href="https://evconnect-my.sharepoint.com/:x:/p/szhang1/EQuB6J-A3uNGnJDxEfFJh70BbGs-R37l4SV0VfbDT9LaAg?e=SKgiwj" className="underline">fault code template</a> detailing possible fault codes sent by the model and their
                             corresponding severity level, source, and appropriate response.</li>
                         <li>Installation/usage manuals, data/spec sheets, and other relevant documentation</li>
                     </ul>

@@ -254,7 +254,11 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                 <H2 className="mb-4">Schedule certification testing</H2>
                 <div className="overflow-y-auto" style={{maxHeight: "calc(100vh - 200px)"}}>
                     <p className="text-sm text-gray-1 my-4">
-                        Before scheduling certification, make sure that your testing unit is properly configured according to the OCPP 1.6J Certification Pre-Requisites.
+                        Before scheduling certification, make sure that your testing unit is properly configured
+                        according to the <a
+                        href="https://evconnect-my.sharepoint.com/:b:/p/szhang1/Eaw4BfkCbCpBt5wvWC0HgScBrs5SoTZ_IsaJPtAzPbzMRg?e=SlBLbS"
+                        className="underline"
+                    >OCPP 1.6J Certification Pre-Requisites</a>.
                     </p>
                     <Checkbox
                         id="isConfigured"
