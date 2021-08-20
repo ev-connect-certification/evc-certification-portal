@@ -129,8 +129,8 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
         });
     }
 
-    const canSubmitTest = !!results.length && results.every(d => d.test) && fileUploadRef.current && fileUploadRef.current.files[0];
     const testsPassed = results.every(d => d.pass);
+    const canSubmitTest = !!results.length && results.every(d => d.test) && (!testsPassed || (fileUploadRef.current && fileUploadRef.current.files[0]));
 
     const thisIndex = requestObj.publicTests
         .sort((a, b) => +new Date(a.approveDate) - +new Date(b.approveDate))
