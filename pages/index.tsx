@@ -50,9 +50,10 @@ export default function Home() {
                 .from<ManufacturerObj>("manufacturers")
                 .select("*");
 
-            if (ManufacturerData && ManufacturerData.length) setManufacturers(ManufacturerData);
-
-            setManufacturerId(ManufacturerData[0].id);
+            if (ManufacturerData && ManufacturerData.length) {
+                setManufacturers(ManufacturerData);
+                setManufacturerId(ManufacturerData[0].id);
+            }
 
             const {data: ModelData, error: ModelError} = await supabase
                 .from<ModelObj>("models")

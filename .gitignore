@@ -34,3 +34,7 @@ yarn-error.log*
 
 # IDE
 /.idea
+
+# temp
+/temp
+pages/temp.tsx
