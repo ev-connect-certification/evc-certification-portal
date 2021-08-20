@@ -90,7 +90,8 @@ export default function RequestPage() {
         (async () => {
             const {data: ManufacturerData, error: ManufacturerError} = await supabase
                 .from<ManufacturerObj>("manufacturers")
-                .select("*");
+                .select("*")
+                .order("name");
 
             if (ManufacturerData && ManufacturerData.length) setManufacturers(ManufacturerData);
 
@@ -103,8 +104,6 @@ export default function RequestPage() {
             if (ModelData && ModelData.length) setModels(ModelData);
 
             const firstManufacturerModel = ModelData.find(d => d.manufacturerId === ManufacturerData[0].id);
-
-            setModelIds(firstManufacturerModel ? [firstManufacturerModel.id] : []);
         })();
     }, []);
 
