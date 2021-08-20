@@ -43,7 +43,10 @@ export default function Navbar({}: {}) {
             </HomeLinkWrapper>
             <Tab href="/" selected={router.route === "/"}>Models</Tab>
             {user && (
-                <Tab href="/request/all" selected={router.route === "/request/all"}>Requests</Tab>
+                <>
+                    <Tab href="/request/all" selected={router.route === "/request/all"}>Requests</Tab>
+                    <Tab href="/admin" selected={router.route === "/admin"}>Admin</Tab>
+                </>
             )}
             <PrimaryButton containerClassName="ml-auto" href="/request/info">{user ? "Add request" : "Request certification"}</PrimaryButton>
             {user ? (
