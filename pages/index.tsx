@@ -48,7 +48,8 @@ export default function Home() {
         (async () => {
             const {data: ManufacturerData, error: ManufacturerError} = await supabase
                 .from<ManufacturerObj>("manufacturers")
-                .select("*");
+                .select("*")
+                .order("name");
 
             if (ManufacturerData && ManufacturerData.length) {
                 setManufacturers(ManufacturerData);
