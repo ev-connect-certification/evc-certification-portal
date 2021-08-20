@@ -27,6 +27,7 @@ import {supabase} from "../../../lib/supabaseClient";
 import {useRouter} from "next/router";
 import LinkWrapper from "../../../components/LinkWrapper";
 import DownloadButton from "../../../components/DownloadButton";
+import Checkbox from "../../../components/Checkbox";
 
 export default function TestPage(props: {requestObj: CertificationRequestObj & {models: {name: string}[]} & {manufacturers: {name: string}} & {publicTests: PublicTestObj[]}, testObj: PublicTestObj}) {
     const {user} = Auth.useUser();
@@ -37,11 +38,8 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
 
     // scheduling states
     const [scheduleOpen, setScheduleOpen] = useState<boolean>(false);
-    const [chargePointId, setChargePointId] = useState<string>("");
-    const [rfidIds, setRfidIds] = useState<string>("");
-    const [scheduleTime, setScheduleTime] = useState<string>("");
     const [accessCode, setAccessCode] = useState<string>("");
-    const [scheduleLoading, setScheduleLoading] = useState<boolean>(false);
+    const [isConfigured, setIsConfigured] = useState<boolean>(false);
 
     // test results
     const [resultsOpen, setResultsOpen] = useState<boolean>(false);
@@ -58,23 +56,21 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
 
     const requestObj = props.requestObj;
 
-    function onSchedule() {
-        setScheduleLoading(true);
+    async function onSchedule() {
+        const {data, error} = await supabase
+            .from("publicTests")
+            .select("*")
+            .eq("id", testObj.id);
 
-        axios.post("/api/scheduleTest", {
-            testId: testObj.id,
-            chargePointId: chargePointId,
-            rfidIds: rfidIds,
-            accessCode: accessCode,
-            scheduleTime: scheduleTime,
-        }).then(res => {
-            setTestObj(res.data);
-            setScheduleOpen(false);
-        }).catch(e => {
-            addToast(e.message, {appearance: "error", autoDismiss: true});
-        }).finally(() => {
-            setScheduleLoading(false);
-        });
+        if (error) return addToast(error.message, {appearance: "error", autoDismiss: true});
+
+        if (!(data && data.length)) return addToast("Error updating test", {appearance: "error", autoDismiss: true});
+
+        if (data[0].status !== "scheduled") addToast("Failed to schedule, please try again", {appearance: "error", autoDismiss: true});
+
+        setTestObj(data[0]);
+
+        setScheduleOpen(false);
     }
 
     async function onSubmitResults() {
@@ -248,27 +244,41 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
             }} className="my-6"/>
             <Modal isOpen={scheduleOpen} setIsOpen={setScheduleOpen} wide={true}>
                 <H2 className="mb-4">Schedule certification testing</H2>
-                <p className="text-sm text-gray-1 my-4">
-                    Before scheduling certification, make sure that your testing unit is properly configured according to the OCPP 1.6J Certification Pre-Requisites.
-                </p>
-                <p className="text-sm text-gray-1 my-4">
-                    Once your unit is properly configured, enter the relevant information and select a testing time below.
-                </p>
-                <ThreeColText text={{
-                    "Charge Point ID": <Input {...getInputStateProps(chargePointId, setChargePointId)}/>,
-                    "RFID IDs": <Input {...getInputStateProps(rfidIds, setRfidIds)}/>,
-                    "Time": <Input type="datetime-local" {...getInputStateProps(scheduleTime, setScheduleTime)}/>,
-                }} className="my-6"/>
-                <Label>Access code</Label>
-                <p className="mb-2 text-gray-1">An EV Connect team member should have emailed you this access code.</p>
-                <Input className="mb-6" {...getInputStateProps(accessCode, setAccessCode)}/>
-                <div className="flex">
-                    <PrimaryButton
-                        disabled={!(chargePointId && rfidIds && scheduleTime && accessCode)}
-                        onClick={onSchedule}
-                        isLoading={scheduleLoading}
-                    >Schedule</PrimaryButton>
-                    <SecondaryButton onClick={() => setScheduleOpen(false)} containerClassName="ml-2">Cancel</SecondaryButton>
+                <div className="overflow-y-auto" style={{maxHeight: "calc(100vh - 200px)"}}>
+                    <p className="text-sm text-gray-1 my-4">
+                        Before scheduling certification, make sure that your testing unit is properly configured according to the OCPP 1.6J Certification Pre-Requisites.
+                    </p>
+                    <Checkbox
+                        id="isConfigured"
+                        label="My unit is properly configured accordiong to the OCPP 1.6J Certification Pre-Requisites"
+                        className="my-2"
+                        checked={isConfigured}
+                        // @ts-ignore
+                        onChange={e => setIsConfigured(e.target.checked)}
+                    />
+                    {isConfigured ? (
+                        <>
+                            <div className="prose text-sm text-gray-1 mt-4">
+                                <p>
+                                    Once your unit is properly configured, select a testing time through the Calendly form below, filling in the following information:
+                                </p>
+                                <ul>
+                                    <li>Charge Point ID: manufacturer-configured Charge Point ID of the test unit</li>
+                                    <li>RFID IDs: the IDs of two RFID tags used for testing</li>
+                                    <li>Test ID: the ID of this test is <code>{testObj.id}</code></li>
+                                </ul>
+                            </div>
+                            <iframe src={`https://calendly.com/bwebsterev/certification-appointment?a3=${testObj.id}`} frameBorder="0" className="w-full -my-8" style={{height: 1280}}/>
+                            <div className="flex">
+                                <PrimaryButton
+                                    onClick={onSchedule}
+                                >Done</PrimaryButton>
+                                <SecondaryButton onClick={() => setScheduleOpen(false)} containerClassName="ml-2">Cancel</SecondaryButton>
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-red-500">Proper configuration is required for certification to continue</p>
+                    )}
                 </div>
             </Modal>
             <hr className="my-12 text-gray-1"/>
