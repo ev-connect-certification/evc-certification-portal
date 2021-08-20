@@ -119,7 +119,7 @@ export default function Home() {
                                         {i !== 0 && (
                                             <span>, </span>
                                         )}
-                                        <LinkWrapper href={`/request/${d.id}`}>
+                                        <LinkWrapper href={`/request/${d.id}`} className="underline">
                                             {d.version + (d.pass ? "" : ` (requested)`)}
                                         </LinkWrapper>
                                     </React.Fragment>
