@@ -50,3 +50,5 @@ const handler: NextApiHandler = async (req, res) => {
         return res500(res, e);
     }
 }
+
+export default handler;
