@@ -27,6 +27,7 @@ export default function ModelSection({model}: {model: ModelObj}) {
         isHubSatellite,
         isWSSSingle,
         updateFrequency,
+        isImport,
     } = model;
 
     const [faultCodeFileKey, setFaultCodeFileKey] = useState<string>("");
@@ -60,25 +61,25 @@ export default function ModelSection({model}: {model: ModelObj}) {
         <DarkSection key={`model-${model.id}`}>
             <H2>{model.name}</H2>
             <ThreeColText text={{
-                "Model Connectivity": isWifi ? isSIM ? "Both" : "WiFi" : "SIM",
-                "Does this model need a hub satellite?": isHubSatellite ? "Yes" : "No",
+                "Model Connectivity": isImport ? "Unknown" : isWifi ? isSIM ? "Both" : "WiFi" : "SIM",
+                "Does this model need a hub satellite?": isImport ? "Unknown" : isHubSatellite ? "Yes" : "No",
                 "Mount Type": mountType.join(", "),
             }} className="my-6"/>
             <ThreeColText text={{
                 "Power Level": "Level " + powerLevel,
                 "Concurrent charges supported?": isConcurrent ? "Yes" : "No",
-                "One webSocket connection per": isWSSSingle ? "Station" : "Connector",
+                "One webSocket connection per": isImport ? "Unknown" : isWSSSingle ? "Station" : "Connector",
             }} className="my-6"/>
             <hr className="my-6 text-gray-1"/>
             <ThreeColText text={{
-                "RFID reader support": featureSupport.includes("rfid") ? "Yes" : "No",
-                "Smart charging profiles support": featureSupport.includes("smart") ? "Yes" : "No",
-                "Freevend mode support": featureSupport.includes("freevend") ? "Yes" : "No",
+                "RFID reader support": isImport ? "Unknown" : featureSupport.includes("rfid") ? "Yes" : "No",
+                "Smart charging profiles support": isImport ? "Unknown" : featureSupport.includes("smart") ? "Yes" : "No",
+                "Freevend mode support": isImport ? "Unknown" : featureSupport.includes("freevend") ? "Yes" : "No",
             }} className="my-6"/>
             <ThreeColText text={{
-                "Throttling support": featureSupport.includes("throttling") ? "Yes" : "No",
-                "CTEP/NTEP certification support": featureSupport.includes("ctepOrNtep") ? "Yes" : "No",
-                "Daisy-chaining support": featureSupport.includes("daisy") ? "Yes" : "No",
+                "Throttling support": isImport ? "Unknown" : featureSupport.includes("throttling") ? "Yes" : "No",
+                "CTEP/NTEP certification support": isImport ? "Unknown" : featureSupport.includes("ctepOrNtep") ? "Yes" : "No",
+                "Daisy-chaining support": isImport ? "Unknown" : featureSupport.includes("daisy") ? "Yes" : "No",
             }} className="my-6"/>
             <hr className="my-6 text-gray-1"/>
             <Label>Connectors ({connectors.length})</Label>
@@ -99,9 +100,9 @@ export default function ModelSection({model}: {model: ModelObj}) {
             <hr className="my-6 text-gray-1"/>
             <ThreeCol>
                 <Label>Over-the-air firmware updates</Label>
-                <p className="text-sm">{featureSupport.includes("ota") ? "Yes" : "No"}</p>
+                <p className="text-sm">{isImport ? "Unknown" : featureSupport.includes("ota") ? "Yes" : "No"}</p>
                 <Label>Credit card support</Label>
-                <p className="text-sm">{isCreditCard ? "Yes" : "No"}</p>
+                <p className="text-sm">{isImport ? "Unknown" : isCreditCard ? "Yes" : "No"}</p>
                 {isCreditCard && (
                     <>
                         <Label>Card reader brand</Label>
@@ -110,15 +111,15 @@ export default function ModelSection({model}: {model: ModelObj}) {
                 )}
             </ThreeCol>
             <ThreeColText text={{
-                "NFC support": paymentFeatures.includes("nfc") ? "Yes" : "No",
-                "Chip support": paymentFeatures.includes("chip") ? "Yes" : "No",
-                "Swipe support": paymentFeatures.includes("swipe") ? "Yes" : "No",
+                "NFC support": isImport ? "Unknown" : paymentFeatures.includes("nfc") ? "Yes" : "No",
+                "Chip support": isImport ? "Unknown" : paymentFeatures.includes("chip") ? "Yes" : "No",
+                "Swipe support": isImport ? "Unknown" : paymentFeatures.includes("swipe") ? "Yes" : "No",
             }} className="my-6"/>
             {updateFrequency && (
                 <>
                     <hr className="my-6 text-gray-1"/>
                     <Label className="mb-2">How often are firmware updates for this model?</Label>
-                    <p className="text-sm">{updateFrequency}</p>
+                    <p className="text-sm">{isImport ? "Unknown" : updateFrequency}</p>
                 </>
             )}
             {faultCodeFileKey && (

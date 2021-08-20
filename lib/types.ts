@@ -15,6 +15,7 @@ export interface ModelObj {
     isHubSatellite: boolean,
     isWSSSingle: boolean,
     updateFrequency?: string,
+    isImport: boolean,
 }
 
 export type paymentFeaturesOpts = "nfc" | "chip" | "swipe";
