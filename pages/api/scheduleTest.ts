@@ -8,7 +8,7 @@ const handler: NextApiHandler = async (req, res) => {
 
     const {chargePointId, rfidIds, scheduleTime, testId, newTest, requestId} = req.body;
 
-    if (!(((!newTest && testId) || (newTest && requestId)) && chargePointId && rfidIds && scheduleTime)) return res400(res);
+    if (!(((!newTest && testId && scheduleTime) || (newTest && requestId)) && chargePointId && rfidIds)) return res400(res);
 
     if (!req.body.accessCode) return res403(res);
 
@@ -20,16 +20,15 @@ const handler: NextApiHandler = async (req, res) => {
                     {
                         accessCode: generate({length: 6, numbers: true}),
                         requestId: requestId,
-                        status: "scheduled",
+                        status: "approved",
                         chargePointId: chargePointId,
-                        testDate: new Date(scheduleTime),
                         rfidIds: rfidIds,
                     }
                 ]);
 
             if (error) throw error;
 
-            if (!(data && data.length)) throw new Error("Failed to update test");
+            if (!(data && data.length)) throw new Error("Failed to create test");
 
             let thisTest = {...data[0]};
 

@@ -51,7 +51,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
 
     // re-schedule new test
     const [reScheduleOpen, setReScheduleOpen] = useState<boolean>(false);
-    const [reScheduleTime, setReScheduleTime] = useState<string>("");
+    const [isFixed, setIsFixed] = useState<boolean>(false);
     const [reScheduleLoading, setReScheduleLoading] = useState<boolean>(false);
 
     const requestObj = props.requestObj;
@@ -115,16 +115,15 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
             newTest: true,
             requestId: requestObj.id,
             chargePointId: testObj.chargePointId,
-            testDate: new Date(reScheduleTime),
             rfidIds: testObj.rfidIds,
-            scheduleTime: reScheduleTime,
             accessCode: accessCode,
         }).then(res => {
-            addToast("Successfully scheduled re-test", {appearance: "success", autoDismiss: true});
+            addToast("Re-test created. Please schedule a time.", {appearance: "success", autoDismiss: true});
             setReScheduleLoading(false);
             setReScheduleOpen(false);
             router.push(`/request/${requestObj.id}/${res.data.id}`);
         }).catch(e => {
+            addToast(e.message, {appearance: "error", autoDismiss: true});
             setReScheduleLoading(false);
         });
     }
@@ -204,30 +203,39 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                     <p className="text-sm text-gray-1">
                         This test failed.
                         {isLaterTest
-                            ? <span> A re-test was scheduled for <LinkWrapper className="underline" href={`/request/${requestObj.id}/${latestTest.id}`}>{format(new Date(latestTest.testDate), "MMMM d, yyyy 'at' h:mm a")}</LinkWrapper>.</span>
+                            ? <span> A re-test was requested on <LinkWrapper className="underline" href={`/request/${requestObj.id}/${latestTest.id}`}>{format(new Date(latestTest.approveDate), "MMMM d, yyyy 'at' h:mm a")}</LinkWrapper>.</span>
                             : user
                                 ? <span> The hardware partner must fix their hardware or software and schedule another test. Share this link and the access code <code className="bg-gray-1 p-1 rounded text-white">{oldAccessCode}</code> to allow them to do so.</span>
                                 : " If you are the hardware partner, please fix your hardware or software and schedule another test using the access code emailed to you."
                         }
                     </p>
-                    {!user && !isLaterTest && (
-                        <PrimaryButton onClick={() => setReScheduleOpen(true)} containerClassName="mt-4">Schedule re-test</PrimaryButton>
-                    )}
-                    {isLaterTest && (
+                    {isLaterTest ? (
                         <SecondaryButton href={`/request/${requestObj.id}/${latestTest.id}`} containerClassName="mt-4">See details</SecondaryButton>
+                    ) : (
+                        <PrimaryButton onClick={() => setReScheduleOpen(true)} containerClassName="mt-4">Schedule re-test</PrimaryButton>
                     )}
                 </DarkSection>
             )}
             <Modal isOpen={reScheduleOpen} setIsOpen={setReScheduleOpen}>
                 <H2 className="mb-4">Schedule re-test</H2>
-                <p className="text-sm text-gray-1">Once you have fixed all issues related to the previous failing test, please schedule a new time to complete certification. The existing charge point ID and RFID IDs will be used.</p>
-                <div className="grid grid-cols-2 grid-flow-col grid-rows-2 gap-2 my-6">
-                    <Label>Re-test date</Label>
-                    <Input type="datetime-local" {...getInputStateProps(reScheduleTime, setReScheduleTime)}/>
-                    <Label>Access code</Label>
-                    <Input {...getInputStateProps(accessCode, setAccessCode)}/>
-                </div>
-                <PrimaryButton onClick={onReSchedule} disabled={!(accessCode && reScheduleTime)} isLoading={reScheduleLoading}>Schedule</PrimaryButton>
+                <p className="text-sm text-gray-1">Once you have fixed all issues related to the previous failing test, please request a new test to complete certification.</p>
+                <Checkbox
+                    id="isFixed"
+                    label="All issues that caused the previous test to fail have been fixed"
+                    className="my-2"
+                    checked={isFixed}
+                    // @ts-ignore
+                    onChange={e => setIsFixed(e.target.checked)}
+                />
+                {isFixed ? (
+                    <>
+                        <Label>Access code</Label>
+                        <Input {...getInputStateProps(accessCode, setAccessCode)}/>
+                        <PrimaryButton onClick={onReSchedule} disabled={!accessCode} className="mt-6">Schedule</PrimaryButton>
+                    </>
+                ) : (
+                    <p className="text-red-500">Fixes must be made before a re-test is scheduled.</p>
+                )}
             </Modal>
             <H2>Test information</H2>
             <ThreeColText text={{
@@ -250,7 +258,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                     </p>
                     <Checkbox
                         id="isConfigured"
-                        label="My unit is properly configured accordiong to the OCPP 1.6J Certification Pre-Requisites"
+                        label="My unit is properly configured according to the OCPP 1.6J Certification Pre-Requisites"
                         className="my-2"
                         checked={isConfigured}
                         // @ts-ignore
@@ -268,7 +276,7 @@ export default function TestPage(props: {requestObj: CertificationRequestObj & {
                                     <li>Test ID: the ID of this test is <code>{testObj.id}</code></li>
                                 </ul>
                             </div>
-                            <iframe src={`https://calendly.com/bwebsterev/certification-appointment?a3=${testObj.id}`} frameBorder="0" className="w-full -my-8" style={{height: 1280}}/>
+                            <iframe src={`https://calendly.com/bwebsterev/certification-appointment?a1=${testObj.chargePointId || ""}&a2=${testObj.rfidIds || ""}&a3=${testObj.id}`} frameBorder="0" className="w-full -my-8" style={{height: 1280}}/>
                             <div className="flex">
                                 <PrimaryButton
                                     onClick={onSchedule}
