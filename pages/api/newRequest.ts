@@ -153,8 +153,7 @@ const handler: NextApiHandler = async (req, res) => {
         if (linkError) throw linkError;
 
         await axios.post("https://api.sendinblue.com/v3/smtp/email", {
-            "api-key": process.env.SENDINBLUE_API_KEY,
-            to: ["certification@evconnect.com"],
+            to: [{email: "certification@evconnect.com"}],
             templateId: 1,
             params: {
                 requesterName: name,
@@ -162,6 +161,10 @@ const handler: NextApiHandler = async (req, res) => {
                 isNewHardware: isHardware ? "Yes" : "No",
                 link: `https://certification.evconnect.com/request/${data[0].id}`,
             }
+        }, {
+            headers: {
+                "api-key": process.env.SENDINBLUE_API_KEY,
+            },
         });
 
         return res200(res, {data: data[0], modelIds: modelIds});
