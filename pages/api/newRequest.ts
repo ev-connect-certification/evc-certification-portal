@@ -160,6 +160,7 @@ const handler: NextApiHandler = async (req, res) => {
                 requesterName: name,
                 requesterEmail: email,
                 isNewHardware: isHardware ? "Yes" : "No",
+                link: `https://certification.evconnect.com/request/${data[0].id}`,
             }
         });
 
