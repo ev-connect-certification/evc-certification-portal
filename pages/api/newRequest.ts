@@ -3,6 +3,8 @@ import {supabaseAdmin} from "../../lib/supabaseAdmin";
 import {CertificationRequestObj, ModelObj} from "../../lib/types";
 import generator from "generate-password";
 import {res200, res400, res403, res405, res500} from "../../lib/apiResponses";
+import axios from "axios";
+import {supabase} from "../../lib/supabaseClient";
 
 const handler: NextApiHandler = async (req, res) => {
     if (req.method !== "POST") return res405(res);
@@ -149,6 +151,17 @@ const handler: NextApiHandler = async (req, res) => {
             })));
 
         if (linkError) throw linkError;
+
+        await axios.post("https://api.sendinblue.com/v3/smtp/email", {
+            "api-key": process.env.SENDINBLUE_API_KEY,
+            to: ["certification@evconnect.com"],
+            templateId: 1,
+            params: {
+                requesterName: name,
+                requesterEmail: email,
+                isNewHardware: isHardware ? "Yes" : "No",
+            }
+        });
 
         return res200(res, {data: data[0], modelIds: modelIds});
     } catch (e) {
