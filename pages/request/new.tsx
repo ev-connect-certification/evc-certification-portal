@@ -575,7 +575,7 @@ export default function RequestPage() {
             <H2>Access code</H2>
             <DarkSection>
                 <Label>Access code</Label>
-                <p className="text-gray-1">To request an access code, send an email to <a href="mailto:contact@evconnect.com" className="underline">contact@evconnect.com</a>.</p>
+                <p className="text-gray-1">To request an access code, send an email to <a href="mailto:certification@evconnect.com" className="underline">certification@evconnect.com</a>.</p>
                 <Input className="mt-2" {...getInputStateProps(accessCode, setAccessCode)}/>
             </DarkSection>
             <PrimaryButton disabled={!canSubmit} onClick={onSubmit}>Submit</PrimaryButton>

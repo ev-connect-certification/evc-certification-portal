@@ -50,7 +50,7 @@ export default function RequestInfo({}: {}) {
                         <li>Installation/usage manuals, data/spec sheets, and other relevant documentation</li>
                     </ul>
                 </Accordion>
-                <p>Lastly, you will need an access code. To request an access code, send an email to <a href="mailto:contact@evconnect.com">contact@evconnect.com</a>.</p>
+                <p>Lastly, you will need an access code. To request an access code, send an email to <a href="mailto:certification@evconnect.com">certification@evconnect.com</a>.</p>
             </div>
             <div className="flex">
                 <PrimaryButton href="/request/new">Next</PrimaryButton>
