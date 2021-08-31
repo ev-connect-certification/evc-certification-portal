@@ -9,8 +9,6 @@ import {supabase} from "../../lib/supabaseClient";
 const handler: NextApiHandler = async (req, res) => {
     if (req.method !== "POST") return res405(res);
 
-    if (!(req.body.accessCode && req.body.accessCode === process.env.REQUEST_ACCESS_CODE)) return res403(res);
-
     if (req.body.isHardware === undefined) return res400(res);
 
     let checkParams = [req.body.name, req.body.email, req.body.firmwareVersion, req.body.manufacturerId, req.body.tier, req.body.team];

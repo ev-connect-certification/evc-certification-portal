@@ -192,7 +192,7 @@ export default function RequestPage() {
     }
 
     const canSubmit = (
-        name && email && firmwareVersion && (modelIds.length || modelName) && manufacturerId && accessCode && tier
+        name && email && firmwareVersion && (modelIds.length || modelName) && manufacturerId && tier
         && (isHardware ? (
             connectors.length && connectors.every(d => (d.maxPower * d.maxVoltage * d.maxCurrent) > 0)
             && (!isCreditCard || (cardBrand)) && updateFrequency && isWSS && isOCPP
@@ -572,12 +572,6 @@ export default function RequestPage() {
                     </DarkSection>
                 </>
             )}
-            <H2>Access code</H2>
-            <DarkSection>
-                <Label>Access code</Label>
-                <p className="text-gray-1">To request an access code, send an email to <a href="mailto:certification@evconnect.com" className="underline">certification@evconnect.com</a>.</p>
-                <Input className="mt-2" {...getInputStateProps(accessCode, setAccessCode)}/>
-            </DarkSection>
             <PrimaryButton disabled={!canSubmit} onClick={onSubmit}>Submit</PrimaryButton>
         </div>
     );
