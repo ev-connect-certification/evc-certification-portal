@@ -55,9 +55,9 @@ export default function AllRequests({}: {}) {
                         .sort((a, b) => +new Date(b.requestDate) - +new Date(a.requestDate))
                         .map(request => (
                             <LinkWrapper key={request.id} href={`/request/${request.id}`} className="flex h-12 items-center">
-                                <div className="flex-shrink-0 w-32"><span>{request.manufacturers.name}</span></div>
-                                <div className="flex-shrink-0 w-64"><span>{request.models.map(d => d.name).join(", ")}</span></div>
-                                <div className="flex-shrink-0 w-48 text-gray-1"><span>{request.firmwareVersion}</span></div>
+                                <div className="flex-shrink-0 w-32 pr-4 truncate"><span>{request.manufacturers.name}</span></div>
+                                <div className="flex-shrink-0 w-64 pr-4 truncate"><span>{request.models.map(d => d.name).join(", ")}</span></div>
+                                <div className="flex-shrink-0 w-48 pr-4 text-gray-1 truncate"><span>{request.firmwareVersion}</span></div>
                                 <div className="flex-shrink-0 w-32 text-gray-1"><span>{request.isHardware ? "Yes" : "No"}</span></div>
                                 <div className="flex-shrink-0 w-32 text-gray-1"><span>{format(new Date(request.requestDate), "MMMM d, yyyy")}</span></div>
                                 <div className="flex-shrink-0 w-32 text-gray-1"><span>Tier {request.tier}</span></div>
