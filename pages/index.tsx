@@ -72,6 +72,7 @@ export default function Home() {
         <div className="max-w-3xl mx-auto my-4 p-6 bg-white rounded border shadow-sm mt-20">
             <SEO/>
             <H1>Look up model</H1>
+            <p className="text-gray-1 mt-2">Select a manufacturer and optionally a model below to see all certified firmware versions</p>
             <DarkSection>
                 <div className="grid gap-x-4 gap-y-2 grid-flow-col" style={{gridTemplateColumns: "1fr 1fr minmax(0, auto)", gridTemplateRows: "repeat(2, max-content)"}}>
                     <Label>Manufacturer</Label>
