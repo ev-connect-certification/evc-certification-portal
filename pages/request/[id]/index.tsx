@@ -29,6 +29,7 @@ import {ssr404} from "../../../lib/apiResponses";
 import BackLink from "../../../components/BackLink";
 import ThreeColText from "../../../components/ThreeColText";
 import ModelSection from "../../../components/ModelSection";
+import axios from "axios";
 
 export default function RequestPage({requestObj}: {requestObj: PublicRequestObj & {models: ModelObj[]} & {manufacturers: ManufacturerObj}}) {
     const {user} = Auth.useUser();
@@ -51,13 +52,23 @@ export default function RequestPage({requestObj}: {requestObj: PublicRequestObj 
                 }
             ]);
 
-        setApproveLoading(false);
+        if (error) {
+            setApproveLoading(false);
+            return addToast(error, {appearance: "error", autoDismiss: true});
+        }
 
-        if (error) return addToast(error, {appearance: "error", autoDismiss: true});
-
-        setApproveOpen(false);
-        setTestsIter(testsIter + 1);
-        addToast("Request approved", {appearance: "success", autoDismiss: true});
+        axios.post("/api/sendApprovedEmail", {
+            requestId: requestObj.id,
+            testId: data[0].id,
+        }).then(() => {
+            setApproveLoading(false);
+            setApproveOpen(false);
+            setTestsIter(testsIter + 1);
+            addToast("Request approved", {appearance: "success", autoDismiss: true});
+        }).catch(e => {
+            setApproveLoading(false);
+            return addToast(e, {appearance: "error", autoDismiss: true});
+        });
     }
 
     useEffect(() => {
